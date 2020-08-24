@@ -1,0 +1,62 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage[ngerman]{babel}
+\usepackage[utf8]{inputenc}
+
+
+\begin{document}
+
+\title{\vspace{-2cm}Thesis Proposal - Procedural Generation of Rube-Goldberg Machines}
+\author{Tomoya Hoemberg und Alexander Dockhorn}
+
+\maketitle
+
+\section{Zielstellung}
+
+Rube-Goldberg Maschinen erfüllen eine bestimmte Aufgabe absichtlich in zahlreichen unnötigen und komplizierten Einzelschritten. Trotzdessen, dass diese keinen praktischen Nutzen erfüllen, faszinieren sie Menschen weltweit.
+
+Ihre Erstellung geschieht zumeist durch die Hand eines menschlichen Tüftlers, welcher diese aus künstlerischen oder Unterhaltungszwecken erstellt. Im Rahmen der Arbeit soll geprüft werden inwiefern Rube-Goldberg Maschinen durch die Anwendung Evolutionärer Algorithmen generiert und kombiniert werden können und ob diese eine ähnliche Qualität erreichen können.
+
+Im Rahmen der Arbeit sollen daher folgende Fragestellungen beantwortet werden:
+\begin{itemize}
+	\item Wie können Rube-Goldberg Maschinen kodiert werden?
+	\item Welche Genetischen Operatoren sind sinnvoll für die Kombination mehrerer Individuen.
+	\item Welche Nebenbedingungen führen zur Generierung von vielfältigen Rube-Goldberg Maschinen.
+\end{itemize}
+
+Für die weitere Evaluierung subjektiver Kriterien, z.B. wahrgenommene Vielfalt erstellter Maschinen oder optische Wirking, bietet sich eine Nutzerstudie an.
+
+
+\section{Methodik}
+Themenschwerpunkt der Arbeit ist der Einsatz mehrkriterieller Optimierunsansätze (multi-objective optimization) zur Erstellung von Rube-Goldberg Maschinen unter mehreren Nebenbedingungen. Mögliche Nebenbedingungen sind:
+\begin{itemize}
+	\item Verwende eine vorgegebene Anzahl an Objekte
+	\item Bedecke eine größt/kleinstmögliche Fläche
+	\item Maximiere die Anzahl an wechselseitigen Interaktionen zwischen den Objekten
+\end{itemize}
+
+Hierbei soll ein Vergleich zwischen a-posteriori und a-priori Methoden erfolgen.
+Inhaltliche Schwerpunkte können hierbei sein:
+\begin{itemize}
+	\item a-posteriori / a-priori multi-objective optimization
+	\item Pareto-Optimalität
+	\item Pareto-Front Optimierung
+\end{itemize}
+
+
+\section{Aufgabenstellungen}
+Die theoretische Analyse der Aufgabenstellung soll mit der Entwicklung eines ausführbaren Prototypens begleitet werden.
+Dieses soll folgende Anforderungen erfüllen:
+
+\begin{itemize}
+	\item freie Definition von Objekten und ihren Eigenschaften
+	\item Platzierung von Objekten durch den Nutzer
+	\item Wahl der Nebenbedingungen
+	\item im Falle eines a-priori Algorithmus die Einstellung einer Gewichtung der Zielkriterien
+	\item im Falle eines a-posteriori Algorithmus die Darstellung einzelner Individuen der Pareto-Front
+	\item eine geeignete Visualisierung der genetischen Operatoren
+	\item Simulation/Ausführung der Rube-Goldberg Maschine
+\end{itemize}
+
+\vfill
+\end{document}
