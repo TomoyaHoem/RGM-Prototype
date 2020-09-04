@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b6119384a757e0b498f4d842f73e7ee7
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - _dominoPrefab: {fileID: 7217507238366976708, guid: 4af2b9297bfb9994d8fe16c8d1bc6896,
+      type: 3}
+  - _floorPrefab: {fileID: 9127746699804633250, guid: e76c1169cb829f04c89bd227a5689551,
+      type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

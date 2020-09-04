@@ -25,10 +25,10 @@ public class FollowMouse : MonoBehaviour
             );
 
         //rotate towards mouse
-        /*
+       
         float angle = Mathf.Atan2(direction.x, direction.y) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.AngleAxis(angle, Vector3.back);
-        */
+        
 
         //move towards mouse
         transform.position = Vector2.Lerp(transform.position, cursorPos, movSpeed);
