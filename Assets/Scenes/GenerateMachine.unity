@@ -234,7 +234,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   start: {x: 0, y: 0}
-  numOfSegments: 5
+  numOfSegments: 4
   machine: []
 --- !u!4 &683793903
 Transform:
