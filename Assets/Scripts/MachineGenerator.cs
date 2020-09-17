@@ -8,6 +8,8 @@ public class MachineGenerator : MonoBehaviour
     public Vector2 start = new Vector2(0,0);
     [SerializeField]
     private int numOfSegments = 2;
+    [SerializeField]
+    private Vector2 startDir = new Vector2(1, 0);
 
     public List<Segment> machine = new List<Segment>();
 
@@ -24,23 +26,39 @@ public class MachineGenerator : MonoBehaviour
     {
         GameObject segment = new GameObject(" Segment"+ i);
 
-        //choose segment
-        //for testing purposes only dominos
+        
+        int ranSeg = 1;
 
-        segment.AddComponent<DominoBuilder>();
+        if(i > 1)
+        {
+            ranSeg = Random.Range(0,3);
+        }
+
+        //choose segment
+        if (ranSeg == 0)
+        {
+            segment.AddComponent<DominoBuilder>();
+        }
+        else if(ranSeg == 1)
+        {
+            segment.AddComponent<BallTrack>();
+        } else
+        {
+            segment.AddComponent<MillBuilder>();
+        }
 
         if(machine.Count == 0)
         {
             //set input as start
             segment.GetComponent<Segment>().Input = start;
             //generate random output for current segment based on start pos
-            segment.GetComponent<Segment>().Output = segment.GetComponent<Segment>().GenerateRandomOutput(start, Vector2.zero);
+            segment.GetComponent<Segment>().Output = segment.GetComponent<Segment>().GenerateRandomOutput(startDir);
         } else
         {
-            //set input as previous output + 1 unit
+            //set input to previous output location
             segment.GetComponent<Segment>().Input = machine[machine.Count-1].GetComponent<Segment>().Output;
             //generate random output for current segment based on previous direction
-            segment.GetComponent<Segment>().Output = segment.GetComponent<Segment>().Input + segment.GetComponent<Segment>().GenerateRandomOutput(segment.GetComponent<Segment>().Input, machine[machine.Count - 1].GetComponent<Segment>().Direction);
+            segment.GetComponent<Segment>().Output = segment.GetComponent<Segment>().Input + segment.GetComponent<Segment>().GenerateRandomOutput(machine[machine.Count - 1].GetComponent<Segment>().GetDirection());
         }
 
         segment.GetComponent<Segment>().GenerateSegment(segment);
