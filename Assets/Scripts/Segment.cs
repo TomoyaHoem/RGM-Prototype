@@ -31,4 +31,7 @@ public abstract class Segment : MonoBehaviour
 
     //generate random end point for Segments considering its limitations (e.g. Dominos on a straight platform)
     public abstract Vector2 GenerateRandomOutput(Vector2 directionPrev);
+
+    //reset segments
+    public abstract void ResetSegment();
 }

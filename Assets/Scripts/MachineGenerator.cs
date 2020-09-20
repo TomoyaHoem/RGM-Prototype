@@ -21,6 +21,19 @@ public class MachineGenerator : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+
+            Debug.Log("Resetting Level");
+
+            foreach (Segment segment in machine)
+            {
+                segment.ResetSegment();
+            }
+        }
+    }
 
     Segment BuildRandomSegment(int i)
     {

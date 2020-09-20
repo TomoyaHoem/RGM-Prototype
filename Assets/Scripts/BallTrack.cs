@@ -5,6 +5,9 @@ using UnityEngine;
 public class BallTrack : Segment
 {
 
+    private Vector2 ballSpawnPos;
+    private Quaternion ballSpawnRotation;
+
     private GameObject ball;
 
     public override Vector2 GenerateRandomOutput(Vector2 directionPrev)
@@ -34,8 +37,10 @@ public class BallTrack : Segment
         Vector2 startSpawnPos = new Vector2(input.x + 0.25f * dir, input.y - 0.36f);
         GameObject start = Instantiate(Resources.Load("Prefabs/Platform"), startSpawnPos, Quaternion.identity, parent.transform) as GameObject;
         //ball
-        Vector2 ballSpawnPos = new Vector2(startSpawnPos.x - 0.2f * dir, startSpawnPos.y + 0.38f);
+        ballSpawnPos = new Vector2(startSpawnPos.x - 0.2f * dir, startSpawnPos.y + 0.38f);
         ball = Instantiate(Resources.Load("Prefabs/Ball"), ballSpawnPos, Quaternion.identity, parent.transform) as GameObject;
+        ballSpawnRotation = ball.transform.rotation;
+
         //end
         Vector2 endSpawnPos = new Vector2(output.x - 0.5f * dir, output.y - 0.36f);
         GameObject end = Instantiate(Resources.Load("Prefabs/Platform"), endSpawnPos, Quaternion.identity, parent.transform) as GameObject;
@@ -51,18 +56,18 @@ public class BallTrack : Segment
         Vector2 endTopLeft = new Vector2(collider.bounds.center.x - 2 * collider.bounds.extents.x * dir, collider.bounds.center.y + collider.bounds.extents.y);
 
         //show points
-        Debug.DrawLine(startTopRight, startTopRight +  new Vector2(0.025f,0) * dir, Color.red, 30);
-        Debug.DrawLine(endTopLeft, endTopLeft - new Vector2(0.025f, 0) * dir, Color.magenta, 30);
+        //Debug.DrawLine(startTopRight, startTopRight +  new Vector2(0.025f,0) * dir, Color.red, 30);
+        //Debug.DrawLine(endTopLeft, endTopLeft - new Vector2(0.025f, 0) * dir, Color.magenta, 30);
 
         //find middle point
         Vector2 startToEndDir = endTopLeft - startTopRight;
         Vector2 middlepoint = startTopRight + startToEndDir * 0.5f;
-        Debug.DrawLine(middlepoint, middlepoint + new Vector2(0.025f, 0) * dir, Color.green, 30);
+        //Debug.DrawLine(middlepoint, middlepoint + new Vector2(0.025f, 0) * dir, Color.green, 30);
 
         //perpendicular vector to dir from middle point
         Vector2 middleToEndDir = startToEndDir.normalized;
         Vector2 perp = new Vector2(middleToEndDir.y * dir, - middleToEndDir.x * dir);
-        Debug.DrawLine(middlepoint, middlepoint + perp, Color.blue, 300);
+        //Debug.DrawLine(middlepoint, middlepoint + perp, Color.blue, 300);
 
         Vector2 rampSpawn = middlepoint + 0.125f * perp;
         GameObject ramp = Instantiate(Resources.Load("Prefabs/Ramp"), rampSpawn, Quaternion.FromToRotation(Vector2.right, startToEndDir), parent.transform) as GameObject;
@@ -76,7 +81,21 @@ public class BallTrack : Segment
         //destroy ball after reaching end of ramp (to not trigger other parts further ahead)
         if (ball != null && ball.transform.position.y < output.y - 0.5f)
         {
-            Destroy(ball);
+            ball.SetActive(false);
+        }
+    }
+
+    public override void ResetSegment()
+    {
+        if(ball != null)
+        {
+            //reset velocity
+            ball.SetActive(false);
+            ball.SetActive(true);
+
+            //reset transform
+            ball.transform.position = ballSpawnPos;
+            ball.transform.rotation = ballSpawnRotation;
         }
     }
 

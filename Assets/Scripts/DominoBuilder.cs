@@ -5,6 +5,12 @@ using UnityEngine;
 public class DominoBuilder : Segment
 {
 
+    private List<GameObject> dominos;
+    private List<Vector2> dominoSpawnPositions;
+    private List<Quaternion> dominoSpawnRotations;
+
+    private GameObject currDomino;
+
     public override Vector2 GenerateRandomOutput(Vector2 directionPrev)
     {
 
@@ -34,6 +40,10 @@ public class DominoBuilder : Segment
 
         Vector2 spawnPos = Vector2.zero;
 
+        dominoSpawnPositions = new List<Vector2>();
+        dominoSpawnRotations = new List<Quaternion>();
+        dominos = new List<GameObject>();
+
         for (int i = 0; i < _floorLen; i++)
         {
 
@@ -53,8 +63,31 @@ public class DominoBuilder : Segment
             //place domino ontop of tile (small offset)
             spawnPos.y += 1f;
 
-            Instantiate(Resources.Load("Prefabs/DominoPiece"), spawnPos, Quaternion.identity, parent.transform);
+            currDomino = Instantiate(Resources.Load("Prefabs/DominoPiece"), spawnPos, Quaternion.identity, parent.transform) as GameObject;
+
+            //save initial transform
+
+            dominoSpawnPositions.Add(spawnPos);
+            dominoSpawnRotations.Add(currDomino.transform.rotation);
+            dominos.Add(currDomino);
         }
 
+    }
+
+    public override void ResetSegment()
+    {
+        if(dominos.Count > 0)
+        {
+            for (int i = 0; i < dominos.Count; i++)
+            {
+                //reset velocity
+                dominos[i].SetActive(false);
+                dominos[i].SetActive(true);
+
+                //reset transform
+                dominos[i].transform.position = dominoSpawnPositions[i];
+                dominos[i].transform.rotation = dominoSpawnRotations[i];
+            }
+        }
     }
 }
