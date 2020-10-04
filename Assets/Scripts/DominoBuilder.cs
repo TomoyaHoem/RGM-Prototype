@@ -90,4 +90,17 @@ public class DominoBuilder : Segment
             }
         }
     }
+
+    public override bool CheckEnoughRoom(Vector2 input, Vector2 output)
+    {
+        Vector2 InputTopCorner = new Vector2(input.x + 0.1f * (int)Mathf.Sign(GetDirection().x), input.y + 0.5f);
+        Vector2 OutputBottomCorner = new Vector2(output.x - 0.1f * (int)Mathf.Sign(GetDirection().x), output.y - 2.8f);
+
+        if (Physics2D.OverlapArea(InputTopCorner, OutputBottomCorner) != null)
+        {
+            return false;
+        }
+        return true;
+    }
+
 }

@@ -10,18 +10,25 @@ public class BallTrack : Segment
 
     private GameObject ball;
 
+    Vector2 cir1;
+    Vector2 cir2;
+    float rad;
+
     public override Vector2 GenerateRandomOutput(Vector2 directionPrev)
     {
-        int ranH = Random.Range(1,5);
-        int ranL = Random.Range(ranH+2, ranH * 2);
+        int ranH = Random.Range(1, 5);
+        int ranL = Random.Range(ranH + 2, ranH * 2);
 
-        if(directionPrev.x > 0) //right
+        if (directionPrev.x > 0) //right
         {
             return new Vector2(ranL, -ranH);
-        } else if(directionPrev.x < 0) //left
+        }
+        else if (directionPrev.x < 0) //left
         {
             return new Vector2(-ranL, -ranH);
-        } else { //no horizontal dir
+        }
+        else
+        { //no horizontal dir
             Debug.Log("vertical input direction not suited for BallTrack");
             return Vector2.zero;
         }
@@ -44,7 +51,7 @@ public class BallTrack : Segment
         //end
         Vector2 endSpawnPos = new Vector2(output.x - 0.5f * dir, output.y - 0.36f);
         GameObject end = Instantiate(Resources.Load("Prefabs/Platform"), endSpawnPos, Quaternion.identity, parent.transform) as GameObject;
-        end.transform.localScale += new Vector3(1,0,0);
+        end.transform.localScale += new Vector3(1, 0, 0);
 
         //connect start and end with Ramp
 
@@ -66,13 +73,13 @@ public class BallTrack : Segment
 
         //perpendicular vector to dir from middle point
         Vector2 middleToEndDir = startToEndDir.normalized;
-        Vector2 perp = new Vector2(middleToEndDir.y * dir, - middleToEndDir.x * dir);
+        Vector2 perp = new Vector2(middleToEndDir.y * dir, -middleToEndDir.x * dir);
         //Debug.DrawLine(middlepoint, middlepoint + perp, Color.blue, 300);
 
         Vector2 rampSpawn = middlepoint + 0.125f * perp;
         GameObject ramp = Instantiate(Resources.Load("Prefabs/Ramp"), rampSpawn, Quaternion.FromToRotation(Vector2.right, startToEndDir), parent.transform) as GameObject;
         //scale ramp to magnitude of vector between start and end
-        ramp.transform.localScale = new Vector3((startToEndDir.magnitude / ramp.GetComponent<SpriteRenderer>().size.x), 1f, 1f);
+        ramp.transform.localScale = new Vector3((startToEndDir.magnitude / ramp.GetComponent<SpriteRenderer>().size.x) - 0.0001f, 1f, 1f);
 
     }
 
@@ -87,7 +94,7 @@ public class BallTrack : Segment
 
     public override void ResetSegment()
     {
-        if(ball != null)
+        if (ball != null)
         {
             //reset velocity
             ball.SetActive(false);
@@ -99,4 +106,78 @@ public class BallTrack : Segment
         }
     }
 
+    public override bool CheckEnoughRoom(Vector2 input, Vector2 output)
+    {
+        float dir = Mathf.Sign(GetDirection().x);
+
+        Vector2 InputTopCorner = new Vector2(input.x + 0.1f * dir, input.y + 0.5f);
+        Vector2 OutputBottomCorner = new Vector2(input.x + 0.5f * dir, input.y - 0.5f);
+
+        //check starting platform
+        if (Physics2D.OverlapArea(InputTopCorner, OutputBottomCorner) != null)
+        {
+            return false;
+        }
+
+        InputTopCorner = new Vector2(output.x - 1.0f * dir, output.y + 0.5f);
+        OutputBottomCorner = new Vector2(output.x - 0.1f * dir, output.y - 0.5f);
+
+        //check end platform
+        if (Physics2D.OverlapArea(InputTopCorner, OutputBottomCorner) != null)
+        {
+            return false;
+        }
+
+        //find middle of ramp
+        //input end +- 0.5x, -0.24y output end +-1x, -0.24y
+        Vector2 startCorner = new Vector2(input.x + 0.5f * dir, input.y - 0.24f);
+        Vector2 endCorner = new Vector2(output.x - 1.0f * dir, output.y - 0.24f);
+        Vector2 startToEnd = endCorner - startCorner;
+        Vector2 middlepoint = startCorner + startToEnd * 0.5f;
+        //perpendicular vector to dir from middle point
+        Vector2 middleToEndDir = startToEnd.normalized;
+        Vector2 perp = new Vector2(middleToEndDir.y * dir, -middleToEndDir.x * dir);
+        Vector2 circleCenter = middlepoint + 0.125f * perp;
+
+        //check ramp
+        //if ramp is long do multiple smaller circles
+        if (startToEnd.magnitude < 3.0f)
+        {
+            //Debug
+            cir1 = circleCenter;
+            rad = startToEnd.magnitude * 0.5f;
+
+            if (Physics2D.OverlapCircle(circleCenter, (startToEnd.magnitude * 0.5f)) != null)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            //Debug
+            cir1 = circleCenter + startToEnd * 0.25f;
+            cir2 = circleCenter - startToEnd * 0.25f;
+
+            rad = startToEnd.magnitude * 0.25f;
+
+            if ((Physics2D.OverlapCircle(cir1, rad) != null) || (Physics2D.OverlapCircle(cir2, rad) != null))
+            {
+                return false;
+            }
+        }
+
+        //no collision
+        return true;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        //Use the same vars you use to draw your Overlap SPhere to draw your Wire Sphere.
+        Gizmos.DrawWireSphere(cir1, rad);
+        if (!cir2.Equals(Vector2.zero))
+        {
+            Gizmos.DrawWireSphere(cir2, rad);
+        }
+    }
 }

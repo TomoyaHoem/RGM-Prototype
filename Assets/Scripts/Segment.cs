@@ -34,4 +34,7 @@ public abstract class Segment : MonoBehaviour
 
     //reset segments
     public abstract void ResetSegment();
+
+    //check if enough space for segment (max size + delta)
+    public abstract bool CheckEnoughRoom(Vector2 input, Vector2 output);
 }

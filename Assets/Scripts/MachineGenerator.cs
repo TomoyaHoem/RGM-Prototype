@@ -13,9 +13,15 @@ public class MachineGenerator : MonoBehaviour
 
     public List<Segment> machine = new List<Segment>();
 
+    private GameObject autoStart;
+
     void Awake()
     {
-        for(int i = 1; i < numOfSegments+1; i++)
+
+        //autoStart
+        SpawnAutoStart();
+        //build machine
+        for (int i = 1; i < numOfSegments+1; i++)
         {
             machine.Add(BuildRandomSegment(i));
         }
@@ -35,9 +41,27 @@ public class MachineGenerator : MonoBehaviour
         }
     }
 
+    void SpawnAutoStart()
+    {
+        Vector2 spawnPos = Vector2.zero;
+
+        if(startDir.x > 0) //place to the left of start
+        {
+            spawnPos = new Vector2(-0.75f, start.y);
+        }
+        else //place to the right of start
+        {
+            spawnPos = new Vector2(0.75f, start.y);
+        }
+
+        //instantiate
+        autoStart = Instantiate(Resources.Load("Prefabs/AutoStart"), spawnPos, Quaternion.identity) as GameObject;
+        autoStart.GetComponent<AutoStart>().PistonDirection = startDir;
+    }
+
     Segment BuildRandomSegment(int i)
     {
-        GameObject segment = new GameObject(" Segment"+ i);
+        GameObject segment = new GameObject("Segment "+ i);
 
         
         int ranSeg = 1;
