@@ -151,10 +151,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   start: {x: 0, y: 0}
-  numOfSegments: 500
+  numOfSegments: 100
   startDir: {x: 1, y: 0}
   timeBetweenSegments: 0
   generateOnKeyInput: 0
+  stuckCount: 0
+  areaSize: 50
   machine: []
 --- !u!4 &673200638
 Transform:
@@ -313,3 +315,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 688dc463753cb2d4e92fb5c09b4a7634, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  panSpeed: 20
+  dragSpeed: 10
+  panLimit: {x: 100, y: 100}
+  scrollSpeed: 2000
+  sizeLimit: 150

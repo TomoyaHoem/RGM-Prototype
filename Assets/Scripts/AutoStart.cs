@@ -15,7 +15,7 @@ public class AutoStart : MonoBehaviour
     //move piston half a unit towards dir
     IEnumerator MovePiston(Transform piston)
     {
-        piston.position = new Vector3(piston.position.x + 0.1f * PistonDirection.x, 0, 0);
+        piston.position = new Vector3(piston.position.x + 0.2f * PistonDirection.x, 0, 0);
         yield return new WaitForSeconds(.1f);
 
     }

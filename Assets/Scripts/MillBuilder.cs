@@ -11,7 +11,10 @@ public class MillBuilder : Segment
     private GameObject mill;
 
     private Vector2 dirChange = new Vector2(1, 0);
-    
+
+    Vector2 boundingBoxTopCorner;
+    Vector2 boundingBoxBottomCorner;
+
     //Mill direction is inverse of previous
     public override Vector2 GetDirection()
     {
@@ -68,14 +71,30 @@ public class MillBuilder : Segment
 
     public override bool CheckEnoughRoom(Vector2 input, Vector2 output)
     {
-        Vector2 InputTopCorner = new Vector2(input.x - 0.1f * (int)(Mathf.Sign(dirChange.x)), input.y - 0.9f * DirVert);
+        boundingBoxTopCorner = new Vector2(input.x - 0.1f * (int)(Mathf.Sign(dirChange.x)), input.y - 0.9f * DirVert);
         //output -1 unit in dirChange direction 
-        Vector2 OutputBottomCorner = new Vector2(output.x - 2.9f * (int)(Mathf.Sign(dirChange.x)), output.y + 0.9f * DirVert);
+        boundingBoxBottomCorner = new Vector2(output.x - 2.9f * (int)(Mathf.Sign(dirChange.x)), output.y + 0.9f * DirVert);
 
-        if (Physics2D.OverlapArea(InputTopCorner, OutputBottomCorner) != null)
+        if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null)
         {
             return false;
         }
         return true;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.red);
+    }
+
+    private void DrawRectangle(Vector2 topCorner, Vector2 bottomCorner, Color color)
+    {
+        Vector2 topOppositeCorner = new Vector2(bottomCorner.x, topCorner.y);
+        Vector2 bottomOppositeCorner = new Vector2(topCorner.x, bottomCorner.y);
+
+        Debug.DrawLine(topCorner, topOppositeCorner, color);
+        Debug.DrawLine(topOppositeCorner, bottomCorner, color);
+        Debug.DrawLine(bottomCorner, bottomOppositeCorner, color);
+        Debug.DrawLine(bottomOppositeCorner, topCorner, color);
     }
 }

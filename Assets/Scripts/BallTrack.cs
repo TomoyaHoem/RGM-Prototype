@@ -10,9 +10,13 @@ public class BallTrack : Segment
 
     private GameObject ball;
 
-    Vector2 cir1;
-    Vector2 cir2;
-    float rad;
+    Vector2 boundingCircleCenterCir1;
+    Vector2 boundingCircleCenterCir2;
+    float boundingCircleRad;
+    Vector2 boundingBoxTopCornerStart;
+    Vector2 boundingBoxBottomCornerEnd;
+    Vector2 boundingBoxTopCornerEnd;
+    Vector2 boudningBoxBottomCornerEnd;
 
     public override Vector2 GenerateRandomOutput(Vector2 directionPrev)
     {
@@ -110,20 +114,20 @@ public class BallTrack : Segment
     {
         float dir = Mathf.Sign(GetDirection().x);
 
-        Vector2 InputTopCorner = new Vector2(input.x + 0.1f * dir, input.y + 0.5f);
-        Vector2 OutputBottomCorner = new Vector2(input.x + 0.5f * dir, input.y - 0.5f);
+        boundingBoxTopCornerStart = new Vector2(input.x + 0.05f * dir, input.y + 0.5f);
+        boundingBoxBottomCornerEnd = new Vector2(input.x + 0.5f * dir, input.y - 0.5f);
 
         //check starting platform
-        if (Physics2D.OverlapArea(InputTopCorner, OutputBottomCorner) != null)
+        if (Physics2D.OverlapArea(boundingBoxTopCornerStart, boundingBoxBottomCornerEnd) != null)
         {
             return false;
         }
 
-        InputTopCorner = new Vector2(output.x - 1.0f * dir, output.y + 0.5f);
-        OutputBottomCorner = new Vector2(output.x - 0.1f * dir, output.y - 0.5f);
+        boundingBoxTopCornerEnd = new Vector2(output.x - 1.0f * dir, output.y + 0.5f);
+        boudningBoxBottomCornerEnd = new Vector2(output.x - 0.1f * dir, output.y - 0.5f);
 
         //check end platform
-        if (Physics2D.OverlapArea(InputTopCorner, OutputBottomCorner) != null)
+        if (Physics2D.OverlapArea(boundingBoxTopCornerEnd, boudningBoxBottomCornerEnd) != null)
         {
             return false;
         }
@@ -144,8 +148,8 @@ public class BallTrack : Segment
         if (startToEnd.magnitude < 3.0f)
         {
             //Debug
-            cir1 = circleCenter;
-            rad = startToEnd.magnitude * 0.5f;
+            boundingCircleCenterCir1 = circleCenter;
+            boundingCircleRad = startToEnd.magnitude * 0.5f;
 
             if (Physics2D.OverlapCircle(circleCenter, (startToEnd.magnitude * 0.5f)) != null)
             {
@@ -155,12 +159,12 @@ public class BallTrack : Segment
         else
         {
             //Debug
-            cir1 = circleCenter + startToEnd * 0.25f;
-            cir2 = circleCenter - startToEnd * 0.25f;
+            boundingCircleCenterCir1 = circleCenter + startToEnd * 0.25f;
+            boundingCircleCenterCir2 = circleCenter - startToEnd * 0.25f;
 
-            rad = startToEnd.magnitude * 0.25f;
+            boundingCircleRad = startToEnd.magnitude * 0.25f;
 
-            if ((Physics2D.OverlapCircle(cir1, rad) != null) || (Physics2D.OverlapCircle(cir2, rad) != null))
+            if ((Physics2D.OverlapCircle(boundingCircleCenterCir1, boundingCircleRad) != null) || (Physics2D.OverlapCircle(boundingCircleCenterCir2, boundingCircleRad) != null))
             {
                 return false;
             }
@@ -174,10 +178,24 @@ public class BallTrack : Segment
     {
         Gizmos.color = Color.red;
         //Use the same vars you use to draw your Overlap SPhere to draw your Wire Sphere.
-        Gizmos.DrawWireSphere(cir1, rad);
-        if (!cir2.Equals(Vector2.zero))
+        Gizmos.DrawWireSphere(boundingCircleCenterCir1, boundingCircleRad);
+        if (!boundingCircleCenterCir2.Equals(Vector2.zero))
         {
-            Gizmos.DrawWireSphere(cir2, rad);
+            Gizmos.DrawWireSphere(boundingCircleCenterCir2, boundingCircleRad);
         }
+        //draw ramp bounding boxes
+        DrawRectangle(boundingBoxTopCornerStart, boundingBoxBottomCornerEnd, Color.red);
+        DrawRectangle(boundingBoxTopCornerEnd, boudningBoxBottomCornerEnd, Color.red);
+    }
+
+    private void DrawRectangle(Vector2 topCorner, Vector2 bottomCorner, Color color)
+    {
+        Vector2 topOppositeCorner = new Vector2(bottomCorner.x, topCorner.y);
+        Vector2 bottomOppositeCorner = new Vector2(topCorner.x, bottomCorner.y);
+
+        Debug.DrawLine(topCorner, topOppositeCorner, color);
+        Debug.DrawLine(topOppositeCorner, bottomCorner, color);
+        Debug.DrawLine(bottomCorner, bottomOppositeCorner, color);
+        Debug.DrawLine(bottomOppositeCorner, topCorner, color);
     }
 }

@@ -20,6 +20,12 @@ public class CoroutineMG : MonoBehaviour
     [SerializeField]
     bool generateOnKeyInput = false;
 
+    [SerializeField]
+    private int stuckCount;
+
+    [SerializeField]
+    private int areaSize = 100;
+
     private GameObject autoStart;
 
     public List<Segment> machine = new List<Segment>();
@@ -30,6 +36,8 @@ public class CoroutineMG : MonoBehaviour
 
     private void Awake()
     {
+        //spawn bounding area
+        SpawnWalls();
         //autoStart
         SpawnAutoStart();
         //build Machine
@@ -50,6 +58,35 @@ public class CoroutineMG : MonoBehaviour
         }
     }
 
+    void SpawnWalls()
+    {
+        GameObject walls = new GameObject("Walls");
+        walls.transform.position = start;
+        walls.transform.parent = gameObject.transform;
+
+        //north wall
+        GameObject wallN = new GameObject("Wall North");
+        wallN.transform.parent = walls.transform;
+        wallN.transform.position = new Vector2(0, areaSize);
+        wallN.AddComponent<BoxCollider2D>().transform.localScale = new Vector2(areaSize * 2, 1);
+        //south wall
+        GameObject wallS = new GameObject("Wall South");
+        wallS.transform.parent = walls.transform;
+        wallS.transform.position = new Vector2(0, -areaSize);
+        wallS.AddComponent<BoxCollider2D>().transform.localScale = new Vector2(areaSize * 2, 1);
+        //west wall
+        GameObject wallW = new GameObject("Wall West");
+        wallW.transform.parent = walls.transform;
+        wallW.transform.position = new Vector2(areaSize, 0);
+        wallW.AddComponent<BoxCollider2D>().transform.localScale = new Vector2(1, areaSize * 2);
+        //east wall
+        GameObject wallE = new GameObject("Wall East");
+        wallE.transform.parent = walls.transform;
+        wallE.transform.position = new Vector2(-areaSize, 0);
+        wallE.AddComponent<BoxCollider2D>().transform.localScale = new Vector2(1, areaSize * 2);
+
+    }
+
     void SpawnAutoStart()
     {
         Vector2 spawnPos = Vector2.zero;
@@ -64,7 +101,7 @@ public class CoroutineMG : MonoBehaviour
         }
 
         //instantiate
-        autoStart = Instantiate(Resources.Load("Prefabs/AutoStart"), spawnPos, Quaternion.identity) as GameObject;
+        autoStart = Instantiate(Resources.Load("Prefabs/AutoStart"), spawnPos, Quaternion.identity, gameObject.transform) as GameObject;
         autoStart.GetComponent<AutoStart>().PistonDirection = startDir;
     }
 
@@ -72,8 +109,13 @@ public class CoroutineMG : MonoBehaviour
     {
         for (int i = 0; i < numOfSegments; i++)
         {
+            if(stuckCount > 1000)
+            {
+                break;
+            }
             yield return StartCoroutine(BuildRandomSegment(i));
         }
+        //add end
     }
 
     IEnumerator BuildRandomSegment(int segmentNum)
@@ -89,12 +131,17 @@ public class CoroutineMG : MonoBehaviour
         //first segment BallTrack
         if (segmentNum == 0)
         {
-            segmentHolder.AddComponent<DominoBuilder>();
+            segmentHolder.AddComponent<BallTrack>();
 
             //set input as start
             segmentHolder.GetComponent<Segment>().Input = start;
             //generate random output for current segment based on start pos
             segmentHolder.GetComponent<Segment>().Output = segmentHolder.GetComponent<Segment>().GenerateRandomOutput(startDir);
+
+            if (!segmentHolder.GetComponent<Segment>().CheckEnoughRoom(start, segmentHolder.GetComponent<Segment>().Output))
+            {
+                yield break;
+            }
         }
         else //other Segments try to find random Fitting Segment
         {
@@ -102,6 +149,7 @@ public class CoroutineMG : MonoBehaviour
 
             if (!FindFittingSegment(segmentHolder, r, 0, segmentNum))
             {
+                stuckCount++;
                 //unable to find fitting Segment -> add to List, destroy previous and current and rebuild, continue
                 //add previous segmenttype to list
                 //Debug.Log(IdentifySegment(machine[machine.Count - 1].gameObject));
@@ -130,6 +178,8 @@ public class CoroutineMG : MonoBehaviour
         segmentHolder.GetComponents<Segment>().Last().GenerateSegment(segmentHolder);
 
         machine.Add(segmentHolder.GetComponents<Segment>().Last());
+
+        segmentHolder.transform.parent = gameObject.transform;
 
         if (generateOnKeyInput)
         {
@@ -280,5 +330,4 @@ public class CoroutineMG : MonoBehaviour
         //generate random output for current segment based on previous direction
         seg.Output = seg.Input + seg.GenerateRandomOutput(machine[machine.Count - 1].GetComponent<Segment>().GetDirection());
     }
-
 }
