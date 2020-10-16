@@ -101,6 +101,7 @@ public class DominoBuilder : Segment
 
         if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null)
         {
+            //Debug.Log(Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner));
             return false;
         }
         return true;

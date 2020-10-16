@@ -7,28 +7,41 @@ using System;
 public class CoroutineMG : MonoBehaviour
 {
 
+    public delegate void SelectionDelegate(GameObject machine);
+    public event SelectionDelegate selectEvent;
+
     [SerializeField]
-    public Vector2 start = new Vector2(0, 0);
+    private Vector2 start = new Vector2(0, 0);
     [SerializeField]
-    private int numOfSegments = 2;
+    private int numOfSegments = 4;
     [SerializeField]
     private Vector2 startDir = new Vector2(1, 0);
 
     [Range(0, 4)]
     [SerializeField]
-    private float timeBetweenSegments = 1.0f;
+    private float timeBetweenSegments = 0f;
     [SerializeField]
     bool generateOnKeyInput = false;
 
     [SerializeField]
     private int stuckCount;
+    [SerializeField]
+    private int backtrackAmount = 5;
 
     [SerializeField]
-    private int areaSize = 100;
+    private int areaSize = 25;
 
     private GameObject autoStart;
+    public int AreaSize { get => areaSize; private set => areaSize = value; }
+    public bool IsSelected { get => isSelected; set => isSelected = value; }
+    public Vector2 Start { get => start; set => start = value; }
+    public GameObject AutoStart { get => autoStart; set => autoStart = value; }
 
     public List<Segment> machine = new List<Segment>();
+
+    bool isSelected = false;
+
+    SpriteRenderer spriteRenderer;
 
     //stores which segments have been tried at position i, to prevent generation getting stuck on same paths
     [SerializeField]
@@ -36,12 +49,19 @@ public class CoroutineMG : MonoBehaviour
 
     private void Awake()
     {
+        //bounding box ignores collision
+        gameObject.layer = 8;
+
+        Start = new Vector2(transform.position.x, transform.position.y);
+        startDir.x = UnityEngine.Random.Range(0, 2) * 2 - 1;
         //spawn bounding area
         SpawnWalls();
         //autoStart
         SpawnAutoStart();
         //build Machine
         StartCoroutine(BuildMachine());
+        //add selection sprite
+        AddSelectionSprite();
     }
 
     void Update()
@@ -58,33 +78,74 @@ public class CoroutineMG : MonoBehaviour
         }
     }
 
+    void OnMouseDown()
+    {
+        if (IsSelected)
+        {
+            Physics2D.autoSimulation = false;
+            spriteRenderer.enabled = false;
+            IsSelected = false;
+        } else
+        {
+            Physics2D.autoSimulation = true;
+            spriteRenderer.enabled = true;
+            IsSelected = true;
+            //broadcast selection
+            selectEvent?.Invoke(gameObject);
+        }
+    }
+
+    void AddSelectionSprite()
+    {
+        GameObject sprite = new GameObject("Sprite");
+        sprite.transform.position = Start;
+        sprite.transform.parent = gameObject.transform;
+
+        sprite.AddComponent<SpriteRenderer>();
+        spriteRenderer = sprite.GetComponent<SpriteRenderer>();
+        spriteRenderer.enabled = false;
+
+        spriteRenderer.sprite = Resources.Load<Sprite>("Sprites/select");
+        spriteRenderer.color = new Color(1, 0, 0, 0.4f);
+        spriteRenderer.sortingOrder = -1;
+
+        spriteRenderer.transform.localScale = new Vector2(areaSize * 2, areaSize * 2);
+    }
+
     void SpawnWalls()
     {
         GameObject walls = new GameObject("Walls");
-        walls.transform.position = start;
+        walls.transform.position = Start;
         walls.transform.parent = gameObject.transform;
 
         //north wall
         GameObject wallN = new GameObject("Wall North");
         wallN.transform.parent = walls.transform;
-        wallN.transform.position = new Vector2(0, areaSize);
-        wallN.AddComponent<BoxCollider2D>().transform.localScale = new Vector2(areaSize * 2, 1);
+        wallN.transform.position = new Vector2(Start.x, Start.y + AreaSize);
+        wallN.AddComponent<BoxCollider2D>().transform.localScale = new Vector2(AreaSize * 2, 1);
         //south wall
         GameObject wallS = new GameObject("Wall South");
         wallS.transform.parent = walls.transform;
-        wallS.transform.position = new Vector2(0, -areaSize);
-        wallS.AddComponent<BoxCollider2D>().transform.localScale = new Vector2(areaSize * 2, 1);
+        wallS.transform.position = new Vector2(Start.x, Start.y - AreaSize);
+        wallS.AddComponent<BoxCollider2D>().transform.localScale = new Vector2(AreaSize * 2, 1);
         //west wall
         GameObject wallW = new GameObject("Wall West");
         wallW.transform.parent = walls.transform;
-        wallW.transform.position = new Vector2(areaSize, 0);
-        wallW.AddComponent<BoxCollider2D>().transform.localScale = new Vector2(1, areaSize * 2);
+        wallW.transform.position = new Vector2(Start.x + AreaSize, Start.y);
+        wallW.AddComponent<BoxCollider2D>().transform.localScale = new Vector2(1, AreaSize * 2);
         //east wall
         GameObject wallE = new GameObject("Wall East");
         wallE.transform.parent = walls.transform;
-        wallE.transform.position = new Vector2(-areaSize, 0);
-        wallE.AddComponent<BoxCollider2D>().transform.localScale = new Vector2(1, areaSize * 2);
+        wallE.transform.position = new Vector2(Start.x - AreaSize, Start.y);
+        wallE.AddComponent<BoxCollider2D>().transform.localScale = new Vector2(1, AreaSize * 2);
+    }
 
+    void AddSelectionArea()
+    {
+        //add BoxCollider2D 2 * size of area to detect when user selects machine
+        gameObject.AddComponent<BoxCollider2D>();
+        BoxCollider2D machineColldier = gameObject.GetComponent<BoxCollider2D>();
+        machineColldier.size = new Vector2(areaSize * 2, areaSize * 2);
     }
 
     void SpawnAutoStart()
@@ -93,28 +154,32 @@ public class CoroutineMG : MonoBehaviour
 
         if (startDir.x > 0) //place to the left of start
         {
-            spawnPos = new Vector2(-0.75f, start.y);
+            spawnPos = new Vector2(Start.x - 0.75f, Start.y);
         }
         else //place to the right of start
         {
-            spawnPos = new Vector2(0.75f, start.y);
+            spawnPos = new Vector2(Start.x + 0.75f, Start.y);
         }
 
         //instantiate
-        autoStart = Instantiate(Resources.Load("Prefabs/AutoStart"), spawnPos, Quaternion.identity, gameObject.transform) as GameObject;
-        autoStart.GetComponent<AutoStart>().PistonDirection = startDir;
+        AutoStart = Instantiate(Resources.Load("Prefabs/AutoStart"), spawnPos, Quaternion.identity, gameObject.transform) as GameObject;
+        AutoStart.GetComponent<AutoStart>().PistonDirection = startDir;
     }
 
     IEnumerator BuildMachine()
     {
+        Physics2D.autoSimulation = false;
+
         for (int i = 0; i < numOfSegments; i++)
         {
-            if(stuckCount > 1000)
+            if(stuckCount > 200)
             {
                 break;
             }
             yield return StartCoroutine(BuildRandomSegment(i));
         }
+        //add selection boundingbox
+        AddSelectionArea();
         //add end
     }
 
@@ -134,11 +199,11 @@ public class CoroutineMG : MonoBehaviour
             segmentHolder.AddComponent<BallTrack>();
 
             //set input as start
-            segmentHolder.GetComponent<Segment>().Input = start;
+            segmentHolder.GetComponent<Segment>().Input = Start;
             //generate random output for current segment based on start pos
-            segmentHolder.GetComponent<Segment>().Output = segmentHolder.GetComponent<Segment>().GenerateRandomOutput(startDir);
+            segmentHolder.GetComponent<Segment>().Output = Start + segmentHolder.GetComponent<Segment>().GenerateRandomOutput(startDir);
 
-            if (!segmentHolder.GetComponent<Segment>().CheckEnoughRoom(start, segmentHolder.GetComponent<Segment>().Output))
+            if (!segmentHolder.GetComponent<Segment>().CheckEnoughRoom(Start, segmentHolder.GetComponent<Segment>().Output))
             {
                 yield break;
             }
@@ -168,7 +233,7 @@ public class CoroutineMG : MonoBehaviour
             }
 
             //clear after unstuck will affect how much will be deleted when stuck
-            if(triedSegments.Count > segmentNum+20)
+            if(triedSegments.Count > segmentNum + backtrackAmount)
             {
                 triedSegments.RemoveRange(segmentNum+1, triedSegments.Count - (segmentNum+1));
             }
@@ -329,5 +394,16 @@ public class CoroutineMG : MonoBehaviour
         seg.Input = machine[machine.Count - 1].GetComponent<Segment>().Output;
         //generate random output for current segment based on previous direction
         seg.Output = seg.Input + seg.GenerateRandomOutput(machine[machine.Count - 1].GetComponent<Segment>().GetDirection());
+    }
+
+    public void DeleteMachine()
+    {
+        Destroy(AutoStart);
+        foreach(Segment seg in machine)
+        {
+            Destroy(seg.gameObject);
+        }
+        machine.Clear();
+        gameObject.GetComponent<BoxCollider2D>().enabled = false;
     }
 }

@@ -8,7 +8,7 @@ public class Piston : MonoBehaviour
     {
         if (collision.gameObject.tag == "SegmentPiece")
         {
-            collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(100, 0));
+            collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(100 * GetComponentInParent<AutoStart>().PistonDirection.x, 0));
         }
     }
 }

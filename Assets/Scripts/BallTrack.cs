@@ -169,7 +169,6 @@ public class BallTrack : Segment
                 return false;
             }
         }
-
         //no collision
         return true;
     }
