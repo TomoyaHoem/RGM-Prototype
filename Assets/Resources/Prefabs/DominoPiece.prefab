@@ -12,9 +12,10 @@ GameObject:
   - component: {fileID: 7217507238366976711}
   - component: {fileID: 7217507238366976710}
   - component: {fileID: 7217507238366976709}
+  - component: {fileID: -6524571934335890420}
   m_Layer: 0
   m_Name: DominoPiece
-  m_TagString: Untagged
+  m_TagString: SegmentPiece
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -130,3 +131,15 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &-6524571934335890420
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7217507238366976708}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f26c4c3051b6644eb05a81b890fe805, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

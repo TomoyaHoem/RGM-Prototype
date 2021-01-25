@@ -154,8 +154,11 @@ MonoBehaviour:
   cameraGrid: []
   bestParents: []
   emptyMachines: []
-  populationSize: 4
-  iterations: 1
+  populationSize: 16
+  iterations: 20
+  autoSelect: 1
+  frequency: 0
+  lineraity: 1
 --- !u!4 &117907416
 Transform:
   m_ObjectHideFlags: 0
@@ -199,6 +202,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15d98de4ebbcf5441889b304a07919ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fitness: 0
   start: {x: 0, y: 0}
   numOfSegments: 25
   startDir: {x: 1, y: 0}
