@@ -9,6 +9,14 @@ public class SegmentSelectionLogic : MonoBehaviour
     //all possible segments (by ID)
     List<int> possibleSegments = new List<int>();
 
+    public int NumPossibleSegments
+    {
+        get
+        {
+            return possibleSegments.Count;
+        }
+    }
+
     private void Awake()
     {
         possibleSegments.Add(0);

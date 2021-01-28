@@ -12,7 +12,7 @@ public class MachineBreeder : MonoBehaviour
     {
         int emptyCount = 0;
 
-        Debug.Log("possible crossovers: " + emptyMachines.Count);
+        //Debug.Log("possible crossovers: " + emptyMachines.Count);
         crossSuc = 0;
 
         for (int i = 0; i < bestParents.Count; i += 2)
@@ -24,7 +24,7 @@ public class MachineBreeder : MonoBehaviour
         bestParents.Clear();
         emptyMachines.Clear();
 
-        Debug.Log("successfull crossovers: " + crossSuc);
+        //Debug.Log("successfull crossovers: " + crossSuc);
 
         yield return null;
     }

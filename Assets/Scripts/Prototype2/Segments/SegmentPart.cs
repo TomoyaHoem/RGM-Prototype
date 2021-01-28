@@ -17,6 +17,8 @@ public abstract class SegmentPart : MonoBehaviour
     //get GO references
     public abstract void CopyProperties(GameObject seg, GameObject parent, Vector3 offset);
 
+    public abstract void MoveSegment(Vector2 offset);
+
     //reset segments
     public abstract void ResetSegment();
 }

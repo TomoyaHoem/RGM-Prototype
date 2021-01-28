@@ -40,11 +40,12 @@ public class MachineTestManager : MonoBehaviour
         //seperate test machines from population
         foreach(GameObject machine in population)
         {
+            machine.SetActive(false);
             if (machine.GetComponent<Machine>().Fitness == 0)
             {
                 //add to list
                 testMachines.Add(machine);
-            } 
+            }
         }
 
         isActive = true;
@@ -67,6 +68,7 @@ public class MachineTestManager : MonoBehaviour
             } else
             {
                 GameObject machine = testMachines[taskID];
+                machine.SetActive(true);
                 //remove parent to allow for move-to other scene
                 machine.transform.parent = null;
                 //move to other scene
@@ -90,6 +92,11 @@ public class MachineTestManager : MonoBehaviour
         }
 
         isActive = false;
+
+        foreach (GameObject machine in population)
+        {
+            machine.SetActive(true);
+        }
     }
 
     private void OnMachineTestFinished(bool manual)

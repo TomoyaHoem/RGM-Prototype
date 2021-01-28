@@ -63,4 +63,21 @@ public class Domino : SegmentPart
             }
         }
     }
+
+    public override void MoveSegment(Vector2 offset)
+    {
+        gameObject.transform.position += (Vector3)offset;
+
+        Input += offset;
+        Output += offset;
+
+        for (int i = 0; i < dominoSpawnPositions.Count; i++)
+        {
+            dominoSpawnPositions[i] += offset;
+        }
+        for (int i = 0; i < Heights.Length; i++)
+        {
+            Heights[i] += offset.y;
+        }
+    }
 }

@@ -45,4 +45,14 @@ public class Ball : SegmentPart
             }
         }
     }
+
+    public override void MoveSegment(Vector2 offset)
+    {
+        gameObject.transform.position += (Vector3)offset;
+
+        Input += offset;
+        Output += offset;
+
+        BallSpawnPos += offset;
+    }
 }

@@ -18,6 +18,7 @@ public class RGMEA : MonoBehaviour
     MachineRater mR;
     MachineSelector mS;
     MachineBreeder mB;
+    MachineMutator mT;
 
 
     //count of generated machines
@@ -56,13 +57,18 @@ public class RGMEA : MonoBehaviour
             while (cur.Running) yield return null;
 
             //Mutation
+            cur = new Task(mT.MutateMachines(population));
+            while (cur.Running) yield return null;
 
             Debug.Log("iteration: " + i);
-            //while (!Input.GetKeyDown(KeyCode.Space))
-            //{
-            //    yield return null;
-            //}
+            while (!Input.GetKeyDown(KeyCode.Space))
+            {
+                yield return null;
+            }
         }
+
+        cur = new Task(mR.RateMachines(population));
+        while (cur.Running) yield return null;
 
         Physics2D.autoSimulation = true;
     }
@@ -109,6 +115,7 @@ public class RGMEA : MonoBehaviour
         mR = gameObject.AddComponent<MachineRater>();
         mS = gameObject.AddComponent<MachineSelector>();
         mB = gameObject.AddComponent<MachineBreeder>();
+        mT = gameObject.AddComponent<MachineMutator>();
         gameObject.AddComponent<MachineTestManager>();
     }
 }

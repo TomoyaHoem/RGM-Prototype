@@ -9,7 +9,7 @@ public class EASettings : ScriptableObject
     [SerializeField] private int populationSize = 16;
     public int PopulationSize { get { return populationSize; } }
 
-    [SerializeField] private float mutationRate = 0;
+    [SerializeField] [Range(0, 1)]private float mutationRate = 0;
     public float MutationRate { get { return mutationRate; } }
 
     [SerializeField]

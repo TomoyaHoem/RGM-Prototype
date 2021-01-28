@@ -107,8 +107,4 @@ public class Machine : MonoBehaviour
             }
         }
     }
-
-    private void OnDrawGizmosSelected()
-    {
-    }
 }
