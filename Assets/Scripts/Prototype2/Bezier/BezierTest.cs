@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class BezierTest : MonoBehaviour
 {
+    [Range(0.05f, 1.5f)]
+    public float spacing = 1;
+    public float resolution = 1;
+    public float meshWidth = 1;
+    public float tiling = 1;
 
     Vector2 input;
     Vector2 output;
@@ -15,6 +20,10 @@ public class BezierTest : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        MeshFilter bezierMesh = curve.AddComponent<MeshFilter>();
+        GameObject pathHolder = new GameObject("PathHolder");
+        pathHolder.transform.parent = curve.transform;
+
         input = transform.position;
 
         float ranH = Random.Range(-5, .5f);
@@ -46,18 +55,23 @@ public class BezierTest : MonoBehaviour
                 g.transform.localScale = Vector3.one * 0.2f;
                 g.GetComponent<Renderer>().material.SetColor("_Color", new Color(1, 1, 1, 125));
             }
-            g.transform.parent = curve.transform;
+            g.transform.parent = pathHolder.transform;
         }
 
-        Vector2[] evenPoints = path.CalculateEvenlySpacedPoints(.1f, 1);
+        Vector2[] evenPoints = path.CalculateEvenlySpacedPoints(spacing, resolution);
         foreach(Vector2 p in evenPoints)
         {
             GameObject g = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             g.transform.position = p;
             g.transform.localScale = Vector3.one * .1f * .5f;
             g.GetComponent<Renderer>().material.SetColor("_Color", Color.green);
-            g.transform.parent = curve.transform;
+            g.transform.parent = pathHolder.transform;
         }
+
+        bezierMesh.mesh = BezierMeshCreator.CreateBezierMesh(evenPoints, meshWidth);
+
+        int textureRepeat = Mathf.RoundToInt(tiling * evenPoints.Length * spacing * 0.5f);
+        curve.GetComponent<MeshRenderer>().sharedMaterial.mainTextureScale = new Vector2(1, textureRepeat);
     }
 
     List<Vector2> CalculateMidPoints(int numPoints)
