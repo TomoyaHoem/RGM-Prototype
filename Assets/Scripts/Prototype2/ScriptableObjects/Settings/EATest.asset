@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0224fcdb3f9c1e54e9a51f3a9db0fd11, type: 3}
   m_Name: EATest
   m_EditorClassIdentifier: 
-  populationSize: 3
+  populationSize: 1
   mutationRate: 1
   iterations: 1
   evolutionMethod: 1

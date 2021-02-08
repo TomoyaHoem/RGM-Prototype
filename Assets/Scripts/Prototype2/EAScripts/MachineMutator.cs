@@ -21,26 +21,24 @@ public class MachineMutator : MonoBehaviour
 
     public IEnumerator MutateMachines(List<GameObject> population)
     {
-        foreach(GameObject machine in population)
+        foreach (GameObject machine in population)
         {
-            //if(machine.GetComponent<Machine>().Fitness == 0)
+            //if (machine.GetComponent<Machine>().Fitness == 0)
             //{
             //    AssignMutation(machine);
             //}
         }
-
         AssignMutation(population[0]);
-
         yield return null;
     }
 
-    private void AssignMutation (GameObject machine)
+    private void AssignMutation(GameObject machine)
     {
         mRef = machine;
 
-        if(random.NextDouble() < SettingsReader.Instance.EASettings.MutationRate)
+        if (random.NextDouble() < SettingsReader.Instance.EASettings.MutationRate)
         {
-            int method = Random.Range(0 , 4);
+            int method = Random.Range(0, 4);
             switch (method)
             {
                 case 0:
@@ -58,7 +56,7 @@ public class MachineMutator : MonoBehaviour
             }
         }
     }
-    
+
     //delete/add/change/replace segment at random index
     private void Mutate(GameObject machine, MutationDelegate mutationDelegate, TryMutationDelegate tryMutationDelegate)
     {
@@ -66,62 +64,65 @@ public class MachineMutator : MonoBehaviour
 
         int index = Random.Range(0, mSegs.Count);
 
-        Debug.Log("mutating: " + machine.name + " at: " + index + " -> " + mutationDelegate.Method.Name);
+        Debug.Log("mutating: " + machine.name + " at: " + index + " -> " + tryMutationDelegate.Method.Name);
 
-        //if last segment
-        if (index == mSegs.Count - 1)
+        //disable latter half of machine
+        SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), false);
+        Vector2 offset;
+        //check if new segment fits
+        if (tryMutationDelegate(mSegs, index))
         {
-            //check if new segment can fit at end
-            //deletion always works
-            if (tryMutationDelegate(mSegs, index))
-            {
-                //if yes add/replace in list or delete
-                mutationDelegate(mSegs, index);
-            } else
-            {
-                //Debug.Log("can not fit mutation at last");
-                Destroy(newSegment);
-                SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), true);
-            }
-        } else
-        {
-            //disable latter half of machine
-            SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), false);
-            Vector2 offset;
-            //check if new segment fits
-            if (tryMutationDelegate(mSegs, index))
-            {
-                //if yes calculate offset via output of new segment, if deleting set output to input
-                offset = newSegment.GetComponent<SegmentPart>().Output - mSegs[index + 1].GetComponent<SegmentPart>().Input;
-                //Debug.Log(offset);
-            } else
-            {
-                //if not reactivate machine, destroy new segment, and go back to original
-                //Debug.Log("could not fit new mutation alone inbetween");
-                Destroy(newSegment);
-                SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), true);
-                return;
-            }
+            //if yes calculate offset via output of new segment, if deleting set output to input
+            //if last segment dont calculate offset
+            offset = (index + 1) < mSegs.Count ? newSegment.GetComponent<SegmentPart>().Output - mSegs[index + 1].GetComponent<SegmentPart>().Input : Vector2.zero;
+            //Debug.Log(offset);
             //check if rest of machine still fits after
-            if (CheckCollision(mSegs.GetRange(index + 1, mSegs.Count - index - 1), offset))
+            if ((index + 1) >= mSegs.Count)
             {
                 //if yes add/replace new segment, move rest and reactivate
                 mutationDelegate(mSegs, index);
                 MoveMachine(mSegs.GetRange(index, mSegs.Count - index), offset);
                 SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), true);
-                //Debug.Log("mutation successfull");
+                Debug.Log("mutation last successfull");
+                return;
             } else
             {
-                //if not reactivate machine, destroy new segment, and go back to original
-                //Debug.Log("could not fit inbetween, going back to original");
-                if (mSegs.Contains(newSegment))
+                //check if output direction matches, if yes -> check collision else check mirrored
+                if (newSegment.GetComponent<SegmentPart>().OutputDirection.x == mSegs[index + 1].GetComponent<SegmentPart>().InputDirection.x)
                 {
-                    mSegs.Remove(newSegment);
+                    if (CheckCollision(mSegs.GetRange(index + 1, mSegs.Count - index - 1), offset))
+                    {
+                        //if yes add/replace new segment, move rest and reactivate
+                        mutationDelegate(mSegs, index);
+                        MoveMachine(mSegs.GetRange(index, mSegs.Count - index), offset);
+                        SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), true);
+                        Debug.Log("mutation normal successfull");
+                        return;
+                    }
                 }
-                Destroy(newSegment);
-                SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), true);
+                else
+                {
+                    if (CheckCollisionMirrored(mSegs.GetRange(index + 1, mSegs.Count - index - 1), offset))
+                    {
+                        //if yes add/replace new segment, move rest and reactivate
+                        mutationDelegate(mSegs, index);
+                        MoveMachineMirrored(mSegs.GetRange(index, mSegs.Count - index), offset);
+                        SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), true);
+                        Debug.Log("mutation mirrored successfull");
+                        return;
+                    }
+                }
             }
         }
+
+        //cant fit -> reactivate machine, destroy new segment, and go back to original
+        //Debug.Log("newly generated does not fit");
+        if (mSegs.Contains(newSegment))
+        {
+            mSegs.Remove(newSegment);
+        }
+        Destroy(newSegment);
+        SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), true);
     }
 
     private bool TryDeleteSegment(List<GameObject> mSegs, int index)
@@ -134,7 +135,8 @@ public class MachineMutator : MonoBehaviour
     private bool TryAddSegment(List<GameObject> mSegs, int index)
     {
         //generate random segment ID, only try domino or balltrack because of mill bug
-        int segID = UnityEngine.Random.Range(0, sL.NumPossibleSegments - 2);
+        int segID = Random.Range(0, sL.NumPossibleSegments);
+        //Debug.Log(segID);
         GenerateNewSegment(mSegs, index, segID);
         //if it has enough room addto list, so that all segments prior get checked including old at index
         if (sL.CheckSegmentRoom(newSegment))
@@ -169,7 +171,7 @@ public class MachineMutator : MonoBehaviour
     private bool TryReplaceSegment(List<GameObject> mSegs, int index)
     {
         //generate random segment ID, only try domino or balltrack
-        int segID = UnityEngine.Random.Range(0, sL.NumPossibleSegments);
+        int segID = Random.Range(0, sL.NumPossibleSegments);
         //generate new random segment
         GenerateNewSegment(mSegs, index, segID);
         if (sL.CheckSegmentRoom(newSegment))
@@ -194,7 +196,7 @@ public class MachineMutator : MonoBehaviour
     {
         //parent new segment and set sibling index to replaced
         newSegment.transform.parent = mRef.transform;
-        newSegment.transform.SetSiblingIndex(mSegs[index+1].transform.GetSiblingIndex());
+        newSegment.transform.SetSiblingIndex(mSegs[index + 1].transform.GetSiblingIndex());
     }
 
     private void ReplaceSegment(List<GameObject> mSegs, int index)
@@ -211,7 +213,7 @@ public class MachineMutator : MonoBehaviour
     {
         newSegment = new GameObject("SegmentNew");
         sL.AssignSegment(newSegment, segID);
-        sL.SetSegmentInOutput(newSegment, mSegs[index].GetComponent<SegmentPart>().Input, mSegs[index].GetComponent<SegmentPart>().GetDirection());
+        sL.SetSegmentIO(newSegment, mSegs[index].GetComponent<SegmentPart>().Input, mSegs[index].GetComponent<SegmentPart>().InputDirection);
         //Debug.Log("old" + segID + ": " + mSegs[index].GetComponent<SegmentPart>().Input + " , " + mSegs[index].GetComponent<SegmentPart>().Output);
         //Debug.Log("new" + segID + ": " + newSegment.GetComponent<SegmentPart>().Input + " , " + newSegment.GetComponent<SegmentPart>().Output);
     }
@@ -220,8 +222,38 @@ public class MachineMutator : MonoBehaviour
     {
         foreach (GameObject seg in machine)
         {
-            //check for any collision but restriction area
+            //check for any collision
             if (!seg.GetComponent<SegmentLogic>().CheckEnoughRoom(seg.GetComponent<SegmentPart>().Input, seg.GetComponent<SegmentPart>().Output, offset, "", false))
+            {
+                //Debug.Log("col" + seg.name);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private bool CheckCollisionMirrored(List<GameObject> machine, Vector2 offset)
+    {
+        Vector2 inp = Vector2.zero;
+        Vector2 outp = Vector2.zero;
+
+        for(int i = 0; i < machine.Count; i++)
+        {
+            //calculate mirrored input
+            //i = 0 -> input = input + offset
+            //else -> input = previously calculated output
+            if(i == 0)
+            {
+                inp = machine[i].GetComponent<SegmentPart>().Input + offset;
+            } else
+            {
+                inp = outp;
+            }
+            //calculate mirrored output, output = input + (ouput - input) * (-1,1)
+            Vector2 segDist = (machine[i].GetComponent<SegmentPart>().Output - machine[i].GetComponent<SegmentPart>().Input) * new Vector2(-1, 1);
+            outp = inp + segDist;
+            //check for any collision
+            if (!machine[i].GetComponent<SegmentLogic>().CheckEnoughRoomMirrored(inp, outp, offset))
             {
                 //Debug.Log("col" + seg.name);
                 return false;
@@ -232,19 +264,42 @@ public class MachineMutator : MonoBehaviour
 
     private void MoveMachine(List<GameObject> machine, Vector2 offset)
     {
-        foreach(GameObject seg in machine)
+        foreach (GameObject seg in machine)
         {
             if (seg == newSegment)
             {
                 continue;
             }
-            seg.GetComponent<SegmentPart>().MoveSegment(offset);
+            seg.GetComponent<SegmentPart>().MoveSegmentBy(offset);
+        }
+    }
+
+    private void MoveMachineMirrored(List<GameObject> machine, Vector2 offset)
+    {
+        Vector2 mirrOffset = Vector2.zero;
+
+        for (int i = 0; i < machine.Count; i++)
+        {
+            if(i == 0)
+            {
+                if (machine[i] == newSegment)
+                {
+                    continue;
+                }
+                mirrOffset = offset;
+            } else
+            {
+                mirrOffset = machine[i - 1].GetComponent<SegmentPart>().Output - machine[i].GetComponent<SegmentPart>().Input;
+            }
+            //Debug.Log(mirrOffset);
+            machine[i].GetComponent<SegmentPart>().MoveSegmentBy(mirrOffset);
+            machine[i].GetComponent<SegmentPart>().MirrorSegment();
         }
     }
 
     private void SwitchGameObjectsState(List<GameObject> go, bool mode)
     {
-        foreach(GameObject g in go)
+        foreach (GameObject g in go)
         {
             g.SetActive(mode);
         }

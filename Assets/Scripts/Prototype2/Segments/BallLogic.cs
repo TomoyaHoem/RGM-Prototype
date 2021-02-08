@@ -59,9 +59,14 @@ public class BallLogic : SegmentLogic
         }
     }
 
+    public override void SetOutputDirection(Vector2 prevDir)
+    {
+        Ball.OutputDirection = new Vector2(prevDir.x, 0);
+    }
+
     public override void GenerateSegment()
     {
-        float dir = RGMTest.Sign(Ball.GetDirection().x);
+        float dir = Ball.InputDirection.x;
         //place start and end platform at in and output
 
         //start
@@ -187,9 +192,84 @@ public class BallLogic : SegmentLogic
         return true;
     }
 
+    public override bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset)
+    {
+        CalculateBoundingBoxesMirrored(input, output);
+
+        //Debug.Log(gameObject.name + boundingBoxTopCornerStart + boundingBoxBottomCornerStartEnd + circleCenter + boundingBoxTopCornerStart  + boundingBoxBottomCornerStartEnd);
+
+        //check starting platform
+        if (Physics2D.OverlapArea(boundingBoxTopCornerStart, boundingBoxBottomCornerStartEnd) != null)
+        {
+            return false;
+        }
+
+        //check end platform
+        if (Physics2D.OverlapArea(boundingBoxTopCornerEnd, boundingBoxBottomCornerEnd) != null)
+        {
+            return false;
+        }
+
+        //check ramp
+        //if ramp is long do multiple smaller circles
+        if (startToEnd.magnitude < 3.0f)
+        {
+            if (Physics2D.OverlapCircle(circleCenter, (startToEnd.magnitude * 0.5f)) != null)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if ((Physics2D.OverlapCircle(boundingCircleCenterCir1, boundingCircleRad) != null) || (Physics2D.OverlapCircle(boundingCircleCenterCir2, boundingCircleRad) != null))
+            {
+                return false;
+            }
+        }
+        //no collision
+        return true;
+    }
+
     private void CalculateBoundingBoxes(Vector2 input, Vector2 output)
     {
-        float dir = RGMTest.Sign(Ball.GetDirection().x);
+        float dir = Ball.InputDirection.x;
+
+        boundingBoxTopCornerStart = new Vector2(input.x + 0.05f * dir, input.y + 0.5f);
+        boundingBoxBottomCornerStartEnd = new Vector2(input.x + 0.5f * dir, input.y - 0.5f);
+
+        boundingBoxTopCornerEnd = new Vector2(output.x - 1.0f * dir, output.y + 0.5f);
+        boundingBoxBottomCornerEnd = new Vector2(output.x - 0.1f * dir, output.y - 0.5f);
+
+        //find middle of ramp
+        //input end +- 0.5x, -0.24y output end +-1x, -0.24y
+        Vector2 startCorner = new Vector2(input.x + 0.5f * dir, input.y - 0.24f);
+        Vector2 endCorner = new Vector2(output.x - 1.0f * dir, output.y - 0.24f);
+        startToEnd = endCorner - startCorner;
+        Vector2 middlepoint = startCorner + startToEnd * 0.5f;
+        //perpendicular vector to dir from middle point
+        Vector2 middleToEndDir = startToEnd.normalized;
+        Vector2 perp = new Vector2(middleToEndDir.y * dir, -middleToEndDir.x * dir);
+        circleCenter = middlepoint + 0.125f * perp;
+
+        if (startToEnd.magnitude < 3.0f)
+        {
+            //Debug
+            boundingCircleCenterCir1 = circleCenter;
+            boundingCircleRad = startToEnd.magnitude * 0.5f;
+        }
+        else
+        {
+            //Debug
+            boundingCircleCenterCir1 = circleCenter + startToEnd * 0.25f;
+            boundingCircleCenterCir2 = circleCenter - startToEnd * 0.25f;
+
+            boundingCircleRad = startToEnd.magnitude * 0.25f;
+        }
+    }
+
+    private void CalculateBoundingBoxesMirrored(Vector2 input, Vector2 output)
+    {
+        float dir = Ball.InputDirection.x * -1;
 
         boundingBoxTopCornerStart = new Vector2(input.x + 0.05f * dir, input.y + 0.5f);
         boundingBoxBottomCornerStartEnd = new Vector2(input.x + 0.5f * dir, input.y - 0.5f);
@@ -227,6 +307,7 @@ public class BallLogic : SegmentLogic
     private void OnDrawGizmosSelected()
     {
         CalculateBoundingBoxes(Ball.Input, Ball.Output);
+        //Debug.Log(Ball.Input + " , " + Ball.Output);
         Gizmos.color = Color.red;
         //Use the same vars you use to draw your Overlap SPhere to draw your Wire Sphere.
         Gizmos.DrawWireSphere(boundingCircleCenterCir1, boundingCircleRad);

@@ -82,10 +82,18 @@ public class SegmentSelectionLogic : MonoBehaviour
         return remaining;
     }
 
-    public void SetSegmentInOutput(GameObject segmentHolder, Vector2 input, Vector2 prevDir)
+    public void SetSegmentIO(GameObject segmentHolder, Vector2 input, Vector2 prevDir)
     {
-        segmentHolder.GetComponent<SegmentPart>().Input = input;
-        segmentHolder.GetComponent<SegmentPart>().Output = input + segmentHolder.GetComponent<SegmentLogic>().GenerateRandomOutput(prevDir);
+        SegmentPart segP = segmentHolder.GetComponent<SegmentPart>();
+        SegmentLogic segL = segmentHolder.GetComponent<SegmentLogic>();
+
+        //input & input dir -> output & output dir of previous
+        segP.InputDirection = prevDir;
+        segP.Input = input;
+        //generate random output
+        segP.Output = input + segL.GenerateRandomOutput(prevDir);
+        //output direction
+        segL.SetOutputDirection(prevDir);
     }
 
     public void DestroySegmentComponents(GameObject segmentHolder)

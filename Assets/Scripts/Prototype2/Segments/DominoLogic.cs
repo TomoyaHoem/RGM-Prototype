@@ -49,6 +49,11 @@ public class DominoLogic : SegmentLogic
         }
     }
 
+    public override void SetOutputDirection(Vector2 prevDir)
+    {
+        Domino.OutputDirection = new Vector2(prevDir.x, 0);
+    }
+
     public override void GenerateSegment()
     {
         //get data reference
@@ -68,9 +73,9 @@ public class DominoLogic : SegmentLogic
         for (int i = 0; i < _floorLen; i++)
         {
             //Debug.Log(Domino.Input.y + " , " + heights[i] + " , " + heightOffset + " , " + Domino.Output.y);
-            spawnPos = new Vector2(Domino.Input.x + 0.5f * RGMTest.Sign(Domino.GetDirection().x), Domino.Heights[i] + Domino.HeightOffset - 2f);
+            spawnPos = new Vector2(Domino.Input.x + 0.5f * RGMTest.Sign(Domino.InputDirection.x), Domino.Heights[i] + Domino.HeightOffset - 2f);
 
-            if (Domino.GetDirection().x > 0)
+            if (Domino.InputDirection.x > 0)
             {
                 spawnPos.x += i;
             }
@@ -120,6 +125,17 @@ public class DominoLogic : SegmentLogic
         return true;
     }
 
+    public override bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset)
+    {
+        CalculateBoundingBoxes(input, output, offset);
+        //Debug.Log(gameObject.name + boundingBoxTopCorner + boundingBoxBottomCorner);
+        Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
+        if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null)
+        {
+            return false;
+        }
+        return true;
+    }
 
     private void CalculateBoundingBoxes(Vector2 input, Vector2 output, Vector2 offset)
     {

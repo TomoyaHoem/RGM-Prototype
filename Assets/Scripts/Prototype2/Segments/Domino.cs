@@ -62,14 +62,15 @@ public class Domino : SegmentPart
                 dominoSpawnRotations.Add(child.rotation);
             }
         }
+        //copy io
+        CopyIO(parent.GetComponent<SegmentPart>(), offset);
     }
 
-    public override void MoveSegment(Vector2 offset)
+    public override void MoveSegmentBy(Vector2 offset)
     {
         gameObject.transform.position += (Vector3)offset;
 
-        Input += offset;
-        Output += offset;
+        MoveIO(offset);
 
         for (int i = 0; i < dominoSpawnPositions.Count; i++)
         {
@@ -79,5 +80,22 @@ public class Domino : SegmentPart
         {
             Heights[i] += offset.y;
         }
+    }
+
+    public override void MirrorSegment()
+    {
+        MirrorIO();
+
+        Transform parent = gameObject.transform.parent;
+        GameObject mirrorAnchor = new GameObject();
+        mirrorAnchor.transform.position = Input;
+        gameObject.transform.parent = mirrorAnchor.transform;
+        
+        Quaternion rot = mirrorAnchor.transform.rotation;
+        Quaternion newRot = new Quaternion(rot.x, rot.y + 180, rot.z, rot.w);
+        mirrorAnchor.transform.rotation = newRot;
+
+        gameObject.transform.parent = parent;
+        Destroy(mirrorAnchor);
     }
 }

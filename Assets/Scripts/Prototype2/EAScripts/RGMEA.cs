@@ -61,16 +61,16 @@ public class RGMEA : MonoBehaviour
             while (cur.Running) yield return null;
 
             Debug.Log("iteration: " + i);
-            while (!Input.GetKeyDown(KeyCode.Space))
-            {
-                yield return null;
-            }
+            //while (!Input.GetKeyDown(KeyCode.Space))
+            //{
+            //    yield return null;
+            //}
         }
 
         cur = new Task(mR.RateMachines(population));
         while (cur.Running) yield return null;
 
-        Physics2D.autoSimulation = true;
+        //Physics2D.autoSimulation = true;
     }
 
     private void InitializePopulation()

@@ -177,9 +177,6 @@ public class MachineBreeder : MonoBehaviour
         copy = Instantiate(seg, (seg.transform.position + offset), seg.transform.rotation);
         copy.transform.parent = empty.transform;
         copy.name = seg.name;
-        //change in and output
-        copy.GetComponent<SegmentPart>().Input = seg.GetComponent<SegmentPart>().Input + (Vector2)offset;
-        copy.GetComponent<SegmentPart>().Output = seg.GetComponent<SegmentPart>().Output + (Vector2)offset;
         copy.GetComponent<SegmentLogic>().GetDataReference();
         copy.GetComponent<SegmentPart>().CopyProperties(copy, seg, offset);
         copy.GetComponent<SegmentPart>().SegmentID = seg.GetComponent<SegmentPart>().SegmentID;

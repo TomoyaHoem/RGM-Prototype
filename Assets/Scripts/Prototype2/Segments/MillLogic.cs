@@ -21,7 +21,6 @@ public class MillLogic : SegmentLogic
         //set mill direction to:
         //horizontal -> inverse of previous, vertical -> same as previous or if previous is 0 random (1 or -1)
         float verDir = Mill.SegmentID == 2 ? -1 : 1;
-        Mill.Direction = new Vector2(prevDir.x * (-1), verDir);
 
         Mill.Scale = Random.Range(0.5f, 2f);
         float displacement = Mill.Scale * 4 - 1;
@@ -37,12 +36,17 @@ public class MillLogic : SegmentLogic
         }
     }
 
+    public override void SetOutputDirection(Vector2 prevDir)
+    {
+        Mill.OutputDirection = new Vector2(prevDir.x * -1, RGMTest.Sign(Mill.Output.y - Mill.Input.y));
+    }
+
     public override void GenerateSegment()
     {
         //spawnposition
         float xOffset = 0.25f + 0.25f * Mill.Scale;
         float yOffset = -0.5f + 2 * Mill.Scale;
-        Mill.MillSpawnPos = new Vector2(Mill.Input.x - Mill.Direction.x * xOffset, Mill.Input.y + Mathf.Sign(Mill.Output.y - Mill.Input.y) * yOffset);
+        Mill.MillSpawnPos = new Vector2(Mill.Input.x + Mill.InputDirection.x * xOffset, Mill.Input.y + Mill.OutputDirection.y * yOffset);
 
         //instantiate
         Mill.MillPiece = Instantiate(Resources.Load("Prefabs/Mill"), Mill.MillSpawnPos, Quaternion.identity, gameObject.transform) as GameObject;
@@ -77,11 +81,30 @@ public class MillLogic : SegmentLogic
         return true;
     }
 
+    public override bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset)
+    {
+        CalculateBoundingBoxesMirrored(input, output);
+        //Debug.Log(gameObject.name + boundingBoxTopCorner + boundingBoxBottomCorner);
+        Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
+        if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null)
+        {
+            return false;
+        }
+        return true;
+    }
+
     private void CalculateBoundingBoxes(Vector2 input, Vector2 output)
     {
-        boundingBoxTopCorner = new Vector2(input.x - 0.1f * (int)(Mathf.Sign(Mill.Direction.x)), input.y - 0.9f * Mill.Direction.y);
+        boundingBoxTopCorner = new Vector2(input.x + 0.1f * Mill.InputDirection.x, input.y - 0.9f * Mill.OutputDirection.y);
         //output -1 unit in dirChange direction 
-        boundingBoxBottomCorner = new Vector2(output.x - 2.9f * (int)(Mathf.Sign(Mill.Direction.x)), output.y + 0.9f * Mill.Direction.y);
+        boundingBoxBottomCorner = new Vector2(output.x + 2.9f * Mill.InputDirection.x, output.y + 0.9f * Mill.OutputDirection.y);
+    }
+
+    private void CalculateBoundingBoxesMirrored(Vector2 input, Vector2 output)
+    {
+        boundingBoxTopCorner = new Vector2(input.x - 0.1f * Mill.InputDirection.x, input.y - 0.9f * Mill.OutputDirection.y);
+        //output -1 unit in dirChange direction 
+        boundingBoxBottomCorner = new Vector2(output.x - 2.9f * Mill.InputDirection.x, output.y + 0.9f * Mill.OutputDirection.y);
     }
 
     private void OnDrawGizmosSelected()

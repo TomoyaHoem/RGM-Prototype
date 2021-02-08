@@ -139,10 +139,10 @@ public class MachineGenerator : MonoBehaviour
             //assign in- / output (first seg or intermitten)
             if(machine.Segments.Count == 0)
             {
-                sL.SetSegmentInOutput(segHol, transform.position, startDir);
+                sL.SetSegmentIO(segHol, transform.position, startDir);
             } else
             {
-                sL.SetSegmentInOutput(segHol, machine.Segments.Last().GetComponent<SegmentPart>().Output, machine.Segments.Last().GetComponent<SegmentPart>().GetDirection());
+                sL.SetSegmentIO(segHol, machine.Segments.Last().GetComponent<SegmentPart>().Output, machine.Segments.Last().GetComponent<SegmentPart>().OutputDirection);
             }
             //check if segment fits, if not destroy segment+logic script & wait 1 frame before next loop so that destroy finishes
             if (sL.CheckSegmentRoom(segHol))
