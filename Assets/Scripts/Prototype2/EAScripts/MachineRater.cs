@@ -49,6 +49,7 @@ public class MachineRater : MonoBehaviour
 
         //Debug.Log(machine.gameObject.name + " Fitness -> " + "Freq: " + freq + " Lin: " + lin + " Comp: " + comp + " Feas: " + feas);
 
+        machine.FitnessVals = fit;
         machine.Fitness = freq + lin + comp + feas;
 
         machine.Canvas.transform.GetChild(0).GetComponent<BarChart>().UpdateBars(fit);

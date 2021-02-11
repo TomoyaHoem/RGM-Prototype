@@ -13,6 +13,7 @@ public class Machine : MonoBehaviour
     public GameObject AutoStart { get; set; }
     public GameObject Canvas { get; set; }
 
+    public List<float> FitnessVals { get; set; }
     public float Fitness { get; set; }
 
     public bool IsSelected { get; set; }
