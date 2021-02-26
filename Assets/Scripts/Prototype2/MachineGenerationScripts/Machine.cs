@@ -16,6 +16,8 @@ public class Machine : MonoBehaviour
     public List<float> FitnessVals { get; set; }
     public float Fitness { get; set; }
 
+    public List<float> TranslatedObjectives { get; set; }
+
     public bool IsSelected { get; set; }
 
     //Event triggers when Machine is selected

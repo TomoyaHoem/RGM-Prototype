@@ -72,6 +72,8 @@ public class BezierTest : MonoBehaviour
 
         int textureRepeat = Mathf.RoundToInt(tiling * evenPoints.Length * spacing * 0.5f);
         curve.GetComponent<MeshRenderer>().sharedMaterial.mainTextureScale = new Vector2(1, textureRepeat);
+
+        BezierMeshCreator.CreateBezierCollider(curve, bezierMesh.mesh, 0.5f);
     }
 
     List<Vector2> CalculateMidPoints(int numPoints)
