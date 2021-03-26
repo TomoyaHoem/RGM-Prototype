@@ -61,10 +61,10 @@ public class RGMEA : MonoBehaviour
             while (cur.Running) yield return null;
 
             Debug.Log("iteration: " + i);
-            //while (!Input.GetKeyDown(KeyCode.Space))
-            //{
-            //    yield return null;
-            //}
+            while (!Input.GetKeyDown(KeyCode.Space))
+            {
+                yield return null;
+            }
         }
 
         cur = new Task(mR.RateMachines(population));

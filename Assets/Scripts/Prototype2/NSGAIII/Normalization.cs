@@ -3,14 +3,14 @@ using UnityEngine;
 
 public static class Normalization
 {
-    static int numObjectives = SettingsReader.Instance.EASettings.FitFunc.Count;
+    static int NUM_OBJECTIVES = 3;//SettingsReader.Instance.EASettings.FitFunc.Count;
 
     //find indeal point and simultaneously translate objectives
     public static List<float> ComputeIdealPoint(List<List<GameObject>> fronts)
     {
         List<float> idealPoint = new List<float>();
 
-        for (int f = 0; f < numObjectives; f++)
+        for (int f = 0; f < NUM_OBJECTIVES; f++)
         {
             float minF = float.MaxValue;
             for (int i = 0; i < fronts[0].Count; i++) //min values must be in first front
@@ -41,7 +41,7 @@ public static class Normalization
     private static float ASF(GameObject machine, int index)
     {
         float maxRatio = float.NegativeInfinity;
-        for (int i = 0; i < numObjectives; i++)
+        for (int i = 0; i < NUM_OBJECTIVES; i++)
         {
             float weight = (index == i) ? 1.0f : 0.00001f;
             maxRatio = Mathf.Max(maxRatio, machine.GetComponent<Machine>().FitnessVals[i] / weight);
@@ -55,7 +55,7 @@ public static class Normalization
         List<GameObject> extremePoints = new List<GameObject>();
         GameObject minIndv = null;
 
-        for (int f = 0; f < numObjectives; f++)
+        for (int f = 0; f < NUM_OBJECTIVES; f++)
         {
             float minASF = float.MaxValue;
             foreach (GameObject machine in fronts[0])
@@ -87,11 +87,13 @@ public static class Normalization
             }
         }
 
+        Debug.Log(duplicate);
+
         List<float> intercepts = new List<float>();
 
         if (duplicate)
         {
-            for (int f = 0; f < numObjectives; f++)
+            for (int f = 0; f < NUM_OBJECTIVES; f++)
             {
                 //add individual with largest value of objective f
                 intercepts.Add(extremePoints[f].GetComponent<Machine>().FitnessVals[f]);
@@ -101,7 +103,7 @@ public static class Normalization
         {
             //find hyperplane equation
             List<float> b = new List<float>();
-            for (int i = 0; i < numObjectives; i++)
+            for (int i = 0; i < NUM_OBJECTIVES; i++)
             {
                 b.Add(1.0f);
             }
@@ -109,7 +111,7 @@ public static class Normalization
             foreach (GameObject machine in extremePoints)
             {
                 List<float> aux = new List<float>();
-                for (int i = 0; i < numObjectives; i++)
+                for (int i = 0; i < NUM_OBJECTIVES; i++)
                 {
                     aux.Add(machine.GetComponent<Machine>().FitnessVals[i]);
                 }
@@ -118,7 +120,7 @@ public static class Normalization
             List<float> x = GaussianElimination(A, b);
 
             //find intercepts
-            for (int f = 0; f < numObjectives; f++)
+            for (int f = 0; f < NUM_OBJECTIVES; f++)
             {
                 intercepts.Add(1.0f / x[f]);
             }
@@ -165,8 +167,7 @@ public static class Normalization
                 }
             }
         }
-
-        List<float> x = new List<float>();
+        List<float> x = new List<float>(new float[b.Count]);
         //back substitution
         for (int i = N - 1; i >= 0; i--)
         {
@@ -189,7 +190,7 @@ public static class Normalization
         {
             foreach (GameObject machine in fronts[t])
             {
-                for (int f = 0; f < numObjectives; f++)
+                for (int f = 0; f < NUM_OBJECTIVES; f++)
                 {
                     List<float> transObj = machine.GetComponent<Machine>().TranslatedObjectives;
                     if (Mathf.Abs(intercepts[f] - idealPoint[f]) > 10e-10)

@@ -24,7 +24,7 @@ public class Path
             Vector2 nextAnchor = i + 1 < midPoints.Count ? midPoints[i + 1] : end;
             InsertPoint(midPoints[i], nextAnchor);
         }
-        Debug.DrawLine(points[points.Count - 4], points[points.Count - 1], Color.red, 100f);
+        //Debug.DrawLine(points[points.Count - 4], points[points.Count - 1], Color.red, 100f);
     }
 
     private void InsertPoint(Vector2 newAnchor, Vector2 nextAnchorPoint)
@@ -40,9 +40,9 @@ public class Path
         Vector2 controlP1 = newAnchor + dir * offset1.magnitude * 0.5f;
         Vector2 controlP2 = newAnchor + dir * -offset2.magnitude * 0.5f;
 
-        Debug.DrawLine(points[points.Count - 4], newAnchor, Color.red, 100f);
-        Debug.DrawLine(newAnchor, controlP1, Color.blue, 100f);
-        Debug.DrawLine(newAnchor, controlP2, Color.green, 100f);
+        //Debug.DrawLine(points[points.Count - 4], newAnchor, Color.red, 100f);
+        //Debug.DrawLine(newAnchor, controlP1, Color.blue, 100f);
+        //Debug.DrawLine(newAnchor, controlP2, Color.green, 100f);
 
         points.Insert(points.Count - 2, controlP1);
         points.Insert(points.Count - 2, newAnchor);
@@ -97,7 +97,7 @@ public class Path
 
         //insert and add point for beginning and end platform
         evenlySpacedPoints.Insert(0, new Vector2(evenlySpacedPoints[0].x - 0.5f * direction.x, evenlySpacedPoints[0].y));
-        evenlySpacedPoints.Add(new Vector2(evenlySpacedPoints[evenlySpacedPoints.Count - 1].x + 1f * direction.x, evenlySpacedPoints[evenlySpacedPoints.Count - 1].y));
+        evenlySpacedPoints.Add(new Vector2(Mathf.Round(evenlySpacedPoints[evenlySpacedPoints.Count - 1].x) + 1f * direction.x, evenlySpacedPoints[evenlySpacedPoints.Count - 1].y));
 
         return evenlySpacedPoints.ToArray();
     }

@@ -102,10 +102,13 @@ public class MachineGenerator : MonoBehaviour
                 }
                 yield return null;
             }
-            //while (!Input.GetKeyDown(KeyCode.Space))
-            //{
-            //    yield return null;
-            //}
+            if (SettingsReader.Instance.MachineSettings.ManualGeneration)
+            {
+                while (!Input.GetKeyDown(KeyCode.Space))
+                {
+                    yield return null;
+                }
+            }
         }
         StopMachineGeneration();
     }

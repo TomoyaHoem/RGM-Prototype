@@ -130,6 +130,9 @@ public class DominoLogic : SegmentLogic
         CalculateBoundingBoxes(input, output, offset);
         //Debug.Log(gameObject.name + boundingBoxTopCorner + boundingBoxBottomCorner);
         Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
+
+        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.yellow, 100);
+
         if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null)
         {
             return false;
@@ -161,17 +164,17 @@ public class DominoLogic : SegmentLogic
     private void OnDrawGizmosSelected()
     {
         CalculateBoundingBoxes(Domino.Input, Domino.Output, Vector2.zero);
-        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.red);
+        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.red, 0);
     }
 
-    private void DrawRectangle(Vector2 topCorner, Vector2 bottomCorner, Color color)
+    private void DrawRectangle(Vector2 topCorner, Vector2 bottomCorner, Color color, float duration)
     {
         Vector2 topOppositeCorner = new Vector2(bottomCorner.x, topCorner.y);
         Vector2 bottomOppositeCorner = new Vector2(topCorner.x, bottomCorner.y);
 
-        Debug.DrawLine(topCorner, topOppositeCorner, color);
-        Debug.DrawLine(topOppositeCorner, bottomCorner, color);
-        Debug.DrawLine(bottomCorner, bottomOppositeCorner, color);
-        Debug.DrawLine(bottomOppositeCorner, topCorner, color);
+        Debug.DrawLine(topCorner, topOppositeCorner, color, duration);
+        Debug.DrawLine(topOppositeCorner, bottomCorner, color, duration);
+        Debug.DrawLine(bottomCorner, bottomOppositeCorner, color, duration);
+        Debug.DrawLine(bottomOppositeCorner, topCorner, color, duration);
     }
 }

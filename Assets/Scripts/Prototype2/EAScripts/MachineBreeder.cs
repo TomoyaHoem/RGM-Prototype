@@ -49,6 +49,7 @@ public class MachineBreeder : MonoBehaviour
         List<GameObject> combined = p1.GetRange(0, p1.Count - midP1 - 1);
         combined.AddRange(p2.GetRange(midP2, p2.Count - midP2 - 1));
 
+        //Debug.Log("Trying crossover with: " + parent1.name + " and: " + parent2.name);
 
         if (CheckCollision(p2.GetRange(midP2, p2.Count - midP2 - 1), offset)
             && CheckAreaFit(combined, offset, midP1, parent1.transform.position))
@@ -115,6 +116,7 @@ public class MachineBreeder : MonoBehaviour
             //check for any collision but restriction area
             if (!seg.GetComponent<SegmentLogic>().CheckEnoughRoom(seg.GetComponent<SegmentPart>().Input, seg.GetComponent<SegmentPart>().Output, offset, "restriction area", false))
             {
+                //Debug.Log(seg.transform.parent.name + " collision: " + seg.name);
                 return false;
             }
         }

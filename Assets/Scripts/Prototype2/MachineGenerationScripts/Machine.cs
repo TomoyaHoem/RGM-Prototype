@@ -16,6 +16,9 @@ public class Machine : MonoBehaviour
     public List<float> FitnessVals { get; set; }
     public float Fitness { get; set; }
 
+    //NSGA2
+    public float CrowdingDistance { get; set; }
+    //NSGA3
     public List<float> TranslatedObjectives { get; set; }
 
     public bool IsSelected { get; set; }

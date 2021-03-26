@@ -11,7 +11,6 @@ public class BallLogic : SegmentLogic
     public override void GetDataReference()
     {
         Ball = gameObject.GetComponent<Ball>();
-
     }
 
     //save BoundingBoxData for DrawGizmo
@@ -72,6 +71,7 @@ public class BallLogic : SegmentLogic
         //start
         Vector2 startSpawnPos = new Vector2(Ball.Input.x + 0.25f * dir, Ball.Input.y - 0.36f);
         GameObject start = Instantiate(Resources.Load("Prefabs/Platform"), startSpawnPos, Quaternion.identity, gameObject.transform) as GameObject;
+
         //ball
         Ball.BallSpawnPos = new Vector2(startSpawnPos.x - 0.2f * dir, startSpawnPos.y + 0.38f);
         Ball.BallPiece = Instantiate(Resources.Load("Prefabs/Ball"), Ball.BallSpawnPos, Quaternion.identity, gameObject.transform) as GameObject;

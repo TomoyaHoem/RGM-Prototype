@@ -11,4 +11,7 @@ public class MachineSettings : ScriptableObject
 
     [SerializeField] private float machineArea = 30;
     public float MachineArea { get { return machineArea; } }
+
+    [SerializeField] private bool manualGeneration = false;
+    public bool ManualGeneration { get { return manualGeneration; } }
 }

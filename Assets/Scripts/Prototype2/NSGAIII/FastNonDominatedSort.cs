@@ -85,7 +85,7 @@ public static class FastNonDominatedSort
     }
 
     //returns true if a dominates b, else false
-    //a dominates b, iff foreach fitness value x of a and fitness value y of b, x >= y & there exists one x where x > y
+    //a dominates b, iff foreach fitness value x of a and fitness value y of b, x <= y & there exists one x where x < y
     private static bool Dominates(GameObject a, GameObject b)
     {
         List<float> fitnessA = a.GetComponent<Machine>().FitnessVals;
@@ -93,16 +93,16 @@ public static class FastNonDominatedSort
 
         bool dominates = false;
 
-        //check if any fitness value of a is less than of b -> if so a does not dominate b
-        //if no fitness value of a is less than of b, check if one value of a is greater than one of b -> a dominates b
+        //check if any fitness value of b is less than of a -> if so a does not dominate b
+        //if no fitness value of b is less than of a, check if one value of a is less than one of b -> a dominates b
         for(int i = 0; i < fitnessA.Count; i++)
         {
-            if (fitnessA[i] < fitnessB[i])
+            if (fitnessB[i] < fitnessA[i])
             {
                 dominates = false;
                 break;
             }
-            if(fitnessA[i] > fitnessB[i])
+            if(fitnessA[i] < fitnessB[i])
             {
                 dominates = true;
             }

@@ -39,6 +39,7 @@ public class MachineMutator : MonoBehaviour
         if (random.NextDouble() < SettingsReader.Instance.EASettings.MutationRate)
         {
             int method = Random.Range(0, 4);
+
             switch (method)
             {
                 case 0:
@@ -88,6 +89,7 @@ public class MachineMutator : MonoBehaviour
             } else
             {
                 //check if output direction matches, if yes -> check collision else check mirrored
+                //Debug.Log(newSegment.GetComponent<SegmentPart>().OutputDirection.x + " " + mSegs[index + 1].GetComponent<SegmentPart>().InputDirection.x);
                 if (newSegment.GetComponent<SegmentPart>().OutputDirection.x == mSegs[index + 1].GetComponent<SegmentPart>().InputDirection.x)
                 {
                     if (CheckCollision(mSegs.GetRange(index + 1, mSegs.Count - index - 1), offset))
@@ -99,6 +101,7 @@ public class MachineMutator : MonoBehaviour
                         Debug.Log("mutation normal successfull");
                         return;
                     }
+                    Debug.Log("fail");
                 }
                 else
                 {
@@ -111,6 +114,7 @@ public class MachineMutator : MonoBehaviour
                         Debug.Log("mutation mirrored successfull");
                         return;
                     }
+                    Debug.Log("mirr fail");
                 }
             }
         }
@@ -121,7 +125,7 @@ public class MachineMutator : MonoBehaviour
         {
             mSegs.Remove(newSegment);
         }
-        Destroy(newSegment);
+        //Destroy(newSegment);
         SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), true);
     }
 
@@ -129,6 +133,7 @@ public class MachineMutator : MonoBehaviour
     {
         newSegment = Instantiate(mSegs[index]);
         newSegment.GetComponent<SegmentPart>().Output = mSegs[index].GetComponent<SegmentPart>().Input;
+        newSegment.GetComponent<SegmentPart>().OutputDirection = mSegs[index].GetComponent<SegmentPart>().OutputDirection;
         return true;
     }
 
@@ -225,7 +230,7 @@ public class MachineMutator : MonoBehaviour
             //check for any collision
             if (!seg.GetComponent<SegmentLogic>().CheckEnoughRoom(seg.GetComponent<SegmentPart>().Input, seg.GetComponent<SegmentPart>().Output, offset, "", false))
             {
-                //Debug.Log("col" + seg.name);
+                Debug.Log("col" + seg.name);
                 return false;
             }
         }
@@ -255,7 +260,7 @@ public class MachineMutator : MonoBehaviour
             //check for any collision
             if (!machine[i].GetComponent<SegmentLogic>().CheckEnoughRoomMirrored(inp, outp, offset))
             {
-                //Debug.Log("col" + seg.name);
+                Debug.Log("col" + machine[i].name);
                 return false;
             }
         }

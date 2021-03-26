@@ -10,6 +10,11 @@ public class BezierTest : MonoBehaviour
     public float meshWidth = 1;
     public float tiling = 1;
 
+    Vector2 bBot = Vector2.zero;
+    Vector2 bTop = Vector2.zero;
+
+    Vector2[] evenPoints;
+
     Vector2 input;
     Vector2 output;
 
@@ -58,7 +63,7 @@ public class BezierTest : MonoBehaviour
             g.transform.parent = pathHolder.transform;
         }
 
-        Vector2[] evenPoints = path.CalculateEvenlySpacedPoints(spacing, resolution);
+        evenPoints = path.CalculateEvenlySpacedPoints(spacing, resolution);
         foreach(Vector2 p in evenPoints)
         {
             GameObject g = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -95,5 +100,37 @@ public class BezierTest : MonoBehaviour
         }
 
         return points;
+    }
+
+    void CalcBoundingBox(Vector2[] points)
+    {
+        float minX = points[0].x, minY = points[0].y, maxX = points[points.Length-1].x, maxY = points[0].y;
+
+        foreach(Vector2 p in points)
+        {
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
+        }
+
+        bBot = new Vector2(minX, minY - meshWidth * 2/3);
+        bTop = new Vector2(maxX, maxY + meshWidth);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (evenPoints == null || evenPoints.Length == 0) return;
+        CalcBoundingBox(evenPoints);
+        DrawRectangle(bTop, bBot, Color.red);
+    }
+
+    private void DrawRectangle(Vector2 topCorner, Vector2 bottomCorner, Color color)
+    {
+        Vector2 topOppositeCorner = new Vector2(bottomCorner.x, topCorner.y);
+        Vector2 bottomOppositeCorner = new Vector2(topCorner.x, bottomCorner.y);
+
+        Debug.DrawLine(topCorner, topOppositeCorner, color);
+        Debug.DrawLine(topOppositeCorner, bottomCorner, color);
+        Debug.DrawLine(bottomCorner, bottomOppositeCorner, color);
+        Debug.DrawLine(bottomOppositeCorner, topCorner, color);
     }
 }

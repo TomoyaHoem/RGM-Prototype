@@ -36,8 +36,8 @@ public class SegmentSelectionLogic : MonoBehaviour
                 segHol.GetComponent<DominoLogic>().Domino = segHol.AddComponent<Domino>();
                 break;
             case 1:
-                segHol.AddComponent<BallLogic>();
-                segHol.GetComponent<BallLogic>().Ball = segHol.AddComponent<Ball>();
+                segHol.AddComponent<BezierTrackLogic>();
+                segHol.GetComponent<BezierTrackLogic>().BezierTrack = segHol.AddComponent<BezierTrack>();
                 break;
             case 2:
                 segHol.AddComponent <MillLogic>();

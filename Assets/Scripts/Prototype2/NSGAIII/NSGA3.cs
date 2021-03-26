@@ -24,6 +24,9 @@ public static class NSGA3
         }
         int lastFrontIndex = currentFrontIndex-1;
 
+        //remove useless fronts
+        fronts.RemoveRange(lastFrontIndex+1, fronts.Count - (lastFrontIndex+1));
+
         //step 9-10
         if(constructPop.Count == populationSize)
         {
@@ -33,7 +36,7 @@ public static class NSGA3
         {
             for (int i = 0; i < lastFrontIndex; i++)
             {
-                foreach (GameObject g in fronts[currentFrontIndex])
+                foreach (GameObject g in fronts[i])
                 {
                     nextPopulation.Add(g);
                 }
