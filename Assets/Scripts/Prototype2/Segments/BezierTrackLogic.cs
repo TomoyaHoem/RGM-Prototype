@@ -21,19 +21,6 @@ public class BezierTrackLogic : SegmentLogic
     Vector2 boundingBoxTopCorner;
     Vector2 boundingBoxBottomCorner;
 
-    public void Update()
-    {
-        //destroy ball after reaching end of ramp (to not trigger other parts further ahead)
-        if (BezierTrack.BallPiece != null)
-        {
-            float treshold = BezierTrack.Input.y > BezierTrack.Output.y ? BezierTrack.Output.y : BezierTrack.Input.y;
-            if (BezierTrack.BallPiece.transform.position.y < treshold - 0.5f)
-            {
-                BezierTrack.BallPiece.SetActive(false);
-            }
-        }
-    }
-
     public override void SetOutputDirection(Vector2 prevDir)
     {
         BezierTrack.OutputDirection = new Vector2(prevDir.x, 0);
@@ -93,16 +80,19 @@ public class BezierTrackLogic : SegmentLogic
 
         BezierMeshCreator.CreateBezierCollider(gameObject, bezierMesh.mesh, 0.5f);
 
-        //Marble
-        BezierTrack.BallSpawnPos = new Vector2(BezierTrack.EvenPoints[0].x + 0.2f * BezierTrack.InputDirection.x, BezierTrack.EvenPoints[0].y + meshWidth);
-        BezierTrack.BallPiece = Instantiate(Resources.Load("Prefabs/Ball"), BezierTrack.BallSpawnPos, Quaternion.identity, gameObject.transform) as GameObject;
-        BezierTrack.BallSpawnRotation = BezierTrack.BallPiece.transform.rotation;
-        BezierTrack.BallPiece.GetComponent<Rigidbody2D>().mass = Random.Range(1, 5);
+        if(Random.Range(0, 2) > 0)
+        {
+            //Marble
+            BezierTrack.BallSpawnPos = new Vector2(BezierTrack.EvenPoints[0].x + 0.2f * BezierTrack.InputDirection.x, BezierTrack.EvenPoints[0].y + meshWidth);
+            BezierTrack.BallPiece = Instantiate(Resources.Load("Prefabs/Ball"), BezierTrack.BallSpawnPos, Quaternion.identity, gameObject.transform) as GameObject;
+            BezierTrack.BallSpawnRotation = BezierTrack.BallPiece.transform.rotation;
+            BezierTrack.BallPiece.GetComponent<Rigidbody2D>().mass = Random.Range(1, 5);
+        }
     }
 
     public override bool CheckEnoughRoom(Vector2 input, Vector2 output)
     {
-        CalcBoundingBox(BezierTrack.EvenPoints, Vector2.zero);
+        CalcBoundingBox(BezierTrack.EvenPoints);
 
         if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null)
         {
@@ -114,7 +104,7 @@ public class BezierTrackLogic : SegmentLogic
 
     public override bool CheckEnoughRoom(Vector2 input, Vector2 output, Vector2 offset, string s, bool mode)
     {
-        CalcBoundingBox(BezierTrack.EvenPoints, offset);
+        CalcBoundingBox(BezierTrack.EvenPoints);
 
         Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
 
@@ -126,9 +116,9 @@ public class BezierTrackLogic : SegmentLogic
         return true;
     }
 
-    public override bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset)
+    public override bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset, string s, bool mode)
     {
-        CalcBoundingBox(BezierTrack.EvenPoints, offset);
+        CalcBoundingBox(BezierTrack.EvenPoints);
         //mirror bounding box
         //Debug.Log(input + " , " + BezierTrack.Input);
         Vector2 inputOffset = input - BezierTrack.Input;
@@ -139,7 +129,7 @@ public class BezierTrackLogic : SegmentLogic
 
         Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
 
-        if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null)
+        if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null && (collider.name.Equals(s) == mode))
         {
             //Debug.Log(collider);
             return false;
@@ -147,7 +137,7 @@ public class BezierTrackLogic : SegmentLogic
         return true;
     }
 
-    private void CalcBoundingBox(Vector2[] points, Vector2 offset)
+    private void CalcBoundingBox(Vector2[] points)
     {
         float minX = points[0].x, minY = points[0].y, maxX = points[points.Length - 1].x, maxY = points[0].y;
 
@@ -166,8 +156,8 @@ public class BezierTrackLogic : SegmentLogic
     private void OnDrawGizmosSelected()
     {
         if (BezierTrack.EvenPoints == null || BezierTrack.EvenPoints.Length == 0) return;
-        CalcBoundingBox(BezierTrack.EvenPoints, Vector2.zero);
-        Debug.Log(boundingBoxBottomCorner + " , " + boundingBoxTopCorner);
+        CalcBoundingBox(BezierTrack.EvenPoints);
+        //Debug.Log(boundingBoxBottomCorner + " , " + boundingBoxTopCorner);
         DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.red, 0);
     }
 
@@ -180,5 +170,37 @@ public class BezierTrackLogic : SegmentLogic
         Debug.DrawLine(topOppositeCorner, bottomCorner, color, duration);
         Debug.DrawLine(bottomCorner, bottomOppositeCorner, color, duration);
         Debug.DrawLine(bottomOppositeCorner, topCorner, color, duration);
+    }
+
+    public override bool CheckSegmentOverlap(Vector2 offset, string s, bool mode, bool mirrored, float duration)
+    {
+        CalcBoundingBox(BezierTrack.EvenPoints);
+
+        //mirror if needed 
+        if (mirrored)
+        {
+            //calculate signed distance between input and output
+            float xDistanceSegment = BezierTrack.Input.x - BezierTrack.Output.x;
+            //mirror bounding box by adding signed distance
+            boundingBoxBottomCorner.x += xDistanceSegment;
+            boundingBoxTopCorner.x += xDistanceSegment;
+        }
+
+        //add offset
+        boundingBoxBottomCorner += offset;
+        boundingBoxTopCorner += offset;
+
+        //draw for testing purposes
+        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.green, duration);
+
+        //calculate collider box
+        Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
+        
+        //check for collision
+        if ((Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner)) != null && (collider.name.Equals(s) == mode))
+        {
+            return false;
+        }
+        return true;
     }
 }

@@ -22,7 +22,7 @@ public class Mill : SegmentPart
     public override void ResetSegment()
     {
         //reset color
-        MillPiece.GetComponent<SpriteRenderer>().color = Color.white;
+        MillPiece.GetComponent<SpriteRenderer>().color = Color.gray;
         //reset velocity
         MillPiece.SetActive(false);
         MillPiece.SetActive(true);
@@ -67,10 +67,16 @@ public class Mill : SegmentPart
         GameObject mirrorAnchor = new GameObject();
         mirrorAnchor.transform.position = Input;
         gameObject.transform.parent = mirrorAnchor.transform;
-        
+
+        /*
         Quaternion rot = mirrorAnchor.transform.rotation;
         Quaternion newRot = new Quaternion(rot.x, rot.y + 180, rot.z, rot.w);
         mirrorAnchor.transform.rotation = newRot;
+        */
+        mirrorAnchor.transform.localScale = new Vector3(mirrorAnchor.transform.localScale.x * (-1), 1, 1);
+
+        MillSpawnPos = MillPiece.transform.position;
+        MillSpawnRotation = MillPiece.transform.rotation;
 
         gameObject.transform.parent = parent;
         Destroy(mirrorAnchor);

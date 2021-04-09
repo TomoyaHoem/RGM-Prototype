@@ -39,8 +39,15 @@ public class RGMEA : MonoBehaviour
 
         Physics2D.autoSimulation = false;
 
+        //Debug.Log("Press Space to start evolution.");
+
+        //while (!Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    yield return null;
+        //}
+
         //Loop
-        for(int i = 0; i < SettingsReader.Instance.EASettings.Iterations; i++)
+        for (int i = 0; i < SettingsReader.Instance.EASettings.Iterations; i++)
         {
             //Rate and Sort Population
             cur = new Task(mR.RateMachines(population));
@@ -61,16 +68,16 @@ public class RGMEA : MonoBehaviour
             while (cur.Running) yield return null;
 
             Debug.Log("iteration: " + i);
-            while (!Input.GetKeyDown(KeyCode.Space))
-            {
-                yield return null;
-            }
+            //while (!Input.GetKeyDown(KeyCode.Space))
+            //{
+            //    yield return null;
+            //}
         }
 
         cur = new Task(mR.RateMachines(population));
         while (cur.Running) yield return null;
 
-        //Physics2D.autoSimulation = true;
+        Physics2D.autoSimulation = true;
     }
 
     private void InitializePopulation()

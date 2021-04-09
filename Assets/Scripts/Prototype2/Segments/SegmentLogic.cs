@@ -22,6 +22,9 @@ public abstract class SegmentLogic : MonoBehaviour
     //check room only for string or anything but string depending on mode: true -> check only, false -> check any but
     public abstract bool CheckEnoughRoom(Vector2 input, Vector2 output, Vector2 offset, string s, bool mode);
 
+
+    public abstract bool CheckSegmentOverlap(Vector2 offset, string s, bool mode, bool mirrored, float duration);
+
     //calculate mirrored original bounding box and move to desired location
-    public abstract bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset);
+    public abstract bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset, string s, bool mode);
 }

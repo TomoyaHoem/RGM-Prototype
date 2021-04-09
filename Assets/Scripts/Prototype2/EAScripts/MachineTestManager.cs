@@ -71,6 +71,7 @@ public class MachineTestManager : MonoBehaviour
                 machine.SetActive(true);
                 //remove parent to allow for move-to other scene
                 machine.transform.parent = null;
+
                 //move to other scene
                 SceneManager.MoveGameObjectToScene(machine, simulationScene);
 

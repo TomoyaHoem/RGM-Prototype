@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class BallLogic : SegmentLogic
 {
-
     //reference to Ball data container
     public Ball Ball { get; set; }
 
@@ -192,7 +191,7 @@ public class BallLogic : SegmentLogic
         return true;
     }
 
-    public override bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset)
+    public override bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset, string s, bool mode)
     {
         CalculateBoundingBoxesMirrored(input, output);
 
@@ -329,5 +328,10 @@ public class BallLogic : SegmentLogic
         Debug.DrawLine(topOppositeCorner, bottomCorner, color);
         Debug.DrawLine(bottomCorner, bottomOppositeCorner, color);
         Debug.DrawLine(bottomOppositeCorner, topCorner, color);
+    }
+
+    public override bool CheckSegmentOverlap(Vector2 offset, string s, bool mode, bool mirrored, float duration)
+    {
+        return false;
     }
 }

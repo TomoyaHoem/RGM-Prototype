@@ -12,6 +12,9 @@ public class Domino : SegmentPart
     public float[] Heights { get; set; }
     public float HeightOffset { get; set; }
 
+    public float ScaleX { get; set; }
+    public float ScaleY { get; set; }
+
     private void Awake()
     {
         SegmentID = 0;
@@ -27,7 +30,7 @@ public class Domino : SegmentPart
             for (int i = 0; i < dominos.Count; i++)
             {
                 //reset color
-                dominos[i].GetComponent<SpriteRenderer>().color = Color.white;
+                dominos[i].GetComponent<SpriteRenderer>().color = Color.gray;
                 //reset velocity
                 dominos[i].SetActive(false);
                 dominos[i].SetActive(true);
@@ -90,10 +93,24 @@ public class Domino : SegmentPart
         GameObject mirrorAnchor = new GameObject();
         mirrorAnchor.transform.position = Input;
         gameObject.transform.parent = mirrorAnchor.transform;
-        
+
+        /*
         Quaternion rot = mirrorAnchor.transform.rotation;
         Quaternion newRot = new Quaternion(rot.x, rot.y + 180, rot.z, rot.w);
         mirrorAnchor.transform.rotation = newRot;
+        */
+        mirrorAnchor.transform.localScale = new Vector3(mirrorAnchor.transform.localScale.x * (-1), 1, 1);
+
+        int count = 0;
+        foreach (Transform child in gameObject.transform)
+        {
+            if (child.tag == "SegmentPiece")
+            {
+                dominoSpawnPositions[count] = child.transform.position;
+                dominoSpawnRotations[count] = child.transform.rotation;
+                count++;
+            }
+        }
 
         gameObject.transform.parent = parent;
         Destroy(mirrorAnchor);

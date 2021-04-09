@@ -18,19 +18,29 @@ public class DominoLogic : SegmentLogic
 
     public override Vector2 GenerateRandomOutput(Vector2 prevDir)
     {
+        //randomize size of domino pieces
+        Domino.ScaleX = Random.Range(0.5f, 1.5f);
+        Domino.ScaleY = Random.Range(0.5f, 1.0f);
+
+        //randomize lenght of domino segment
         int ranL = Random.Range(2, 6) * 2;
+        //random seed for perlin noise
         int ranS = Random.Range(0, 10000);
 
+        //list of random heights for each domino platform
         Domino.Heights = new float[ranL];
 
+        //perlin noise parameters
         float scale = 10f;
         float amplitude = 5f;
 
+        //init heights with perlin noise
         for (int i = ranS; i < ranS + ranL; i++)
         {
             Domino.Heights[i - ranS] = Mathf.PerlinNoise(i / scale, 0) * amplitude;
         }
 
+        //save heightoffset of input
         Domino.HeightOffset = Domino.Input.y - Domino.Heights[0];
 
         if (prevDir.x > 0) //right
@@ -73,7 +83,7 @@ public class DominoLogic : SegmentLogic
         for (int i = 0; i < _floorLen; i++)
         {
             //Debug.Log(Domino.Input.y + " , " + heights[i] + " , " + heightOffset + " , " + Domino.Output.y);
-            spawnPos = new Vector2(Domino.Input.x + 0.5f * RGMTest.Sign(Domino.InputDirection.x), Domino.Heights[i] + Domino.HeightOffset - 2f);
+            spawnPos = new Vector2(Domino.Input.x + 0.5f * RGMTest.Sign(Domino.InputDirection.x), Domino.Heights[i] + Domino.HeightOffset - (2f * Domino.ScaleY));
 
             if (Domino.InputDirection.x > 0)
             {
@@ -90,12 +100,35 @@ public class DominoLogic : SegmentLogic
             //place domino ontop of tile (small offset)
             spawnPos.y += 1f;
 
-            GameObject currDomino = Instantiate(Resources.Load("Prefabs/DominoPiece"), spawnPos, Quaternion.identity, gameObject.transform) as GameObject;
+            //tiny random domino pos offset for variation
+            spawnPos.x += Random.Range(-0.1f, 0.1f);
 
-            //save initial transform
-            Domino.dominoSpawnPositions.Add(spawnPos);
-            Domino.dominoSpawnRotations.Add(currDomino.transform.rotation);
-            Domino.dominos.Add(currDomino);
+            //if dominos are small, sometimes place two per tile
+            int two = Random.Range(0, 3);
+
+            if (Domino.ScaleX < 1.0f && (two == 1))
+            {
+                for (int j = 0; j < 2; j++)
+                {
+                    spawnPos.x = j == 0 ? spawnPos.x + 0.25f : spawnPos.x - 0.5f;
+                    GameObject currDomino = Instantiate(Resources.Load("Prefabs/DominoPiece"), spawnPos, Quaternion.identity, gameObject.transform) as GameObject;
+                    currDomino.transform.localScale = new Vector3(currDomino.transform.localScale.x * Domino.ScaleX, currDomino.transform.localScale.y * Domino.ScaleY, currDomino.transform.localScale.z);
+
+                    //save initial transform
+                    Domino.dominoSpawnPositions.Add(spawnPos);
+                    Domino.dominoSpawnRotations.Add(currDomino.transform.rotation);
+                    Domino.dominos.Add(currDomino);
+                }
+            } else
+            {
+                GameObject currDomino = Instantiate(Resources.Load("Prefabs/DominoPiece"), spawnPos, Quaternion.identity, gameObject.transform) as GameObject;
+                currDomino.transform.localScale = new Vector3(currDomino.transform.localScale.x * Domino.ScaleX, currDomino.transform.localScale.y * Domino.ScaleY, currDomino.transform.localScale.z);
+
+                //save initial transform
+                Domino.dominoSpawnPositions.Add(spawnPos);
+                Domino.dominoSpawnRotations.Add(currDomino.transform.rotation);
+                Domino.dominos.Add(currDomino);
+            }
         }
     }
 
@@ -125,7 +158,7 @@ public class DominoLogic : SegmentLogic
         return true;
     }
 
-    public override bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset)
+    public override bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset, string s, bool mode)
     {
         CalculateBoundingBoxes(input, output, offset);
         //Debug.Log(gameObject.name + boundingBoxTopCorner + boundingBoxBottomCorner);
@@ -133,7 +166,7 @@ public class DominoLogic : SegmentLogic
 
         DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.yellow, 100);
 
-        if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null)
+        if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null && (collider.name.Equals(s) == mode))
         {
             return false;
         }
@@ -157,8 +190,8 @@ public class DominoLogic : SegmentLogic
 
         //Debug.Log("Bot: " + minX + ":" + minY + " , Top: " + maxX + ":" + maxY);
 
-        boundingBoxTopCorner = new Vector2(maxX - 0.1f, maxY + 0.9f);
         boundingBoxBottomCorner = new Vector2(minX + 0.1f, minY - 2.5f);
+        boundingBoxTopCorner = new Vector2(maxX - 0.1f, maxY + 0.9f);
     }
 
     private void OnDrawGizmosSelected()
@@ -176,5 +209,56 @@ public class DominoLogic : SegmentLogic
         Debug.DrawLine(topOppositeCorner, bottomCorner, color, duration);
         Debug.DrawLine(bottomCorner, bottomOppositeCorner, color, duration);
         Debug.DrawLine(bottomOppositeCorner, topCorner, color, duration);
+    }
+
+    private void CalcBoundingBox()
+    {
+        float minY = float.PositiveInfinity, maxY = float.NegativeInfinity;
+
+        for (int i = 0; i < Domino.Heights.Length; i++)
+        {
+            float yPos = Domino.Heights[i] + Domino.HeightOffset;
+
+            if (yPos < minY) minY = yPos;
+            if (yPos > maxY) maxY = yPos;
+        }
+
+        float minX = Domino.Input.x < Domino.Output.x ? Domino.Input.x : Domino.Output.x;
+        float maxX = Domino.Input.x > Domino.Output.x ? Domino.Input.x : Domino.Output.x;
+
+        boundingBoxBottomCorner = new Vector2(minX + 0.1f, minY - 2.5f);
+        boundingBoxTopCorner = new Vector2(maxX - 0.1f, maxY + 0.9f);
+    }
+
+    public override bool CheckSegmentOverlap(Vector2 offset, string s, bool mode, bool mirrored, float duration)
+    {
+        CalcBoundingBox();
+
+        //mirror if needed 
+        if (mirrored)
+        {
+            //calculate signed distance between input and output
+            float xDistanceSegment = Domino.Input.x - Domino.Output.x;
+            //mirror bounding box by adding signed distance
+            boundingBoxBottomCorner.x += xDistanceSegment;
+            boundingBoxTopCorner.x += xDistanceSegment;
+        }
+
+        //add offset
+        boundingBoxBottomCorner += offset;
+        boundingBoxTopCorner += offset;
+
+        //draw for testing purposes
+        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.blue, duration);
+
+        //calculate collider box
+        Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
+
+        //check for collision
+        if ((Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner)) != null && (collider.name.Equals(s) == mode))
+        {
+            return false;
+        }
+        return true;
     }
 }

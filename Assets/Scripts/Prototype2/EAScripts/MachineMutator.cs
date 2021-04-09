@@ -23,12 +23,12 @@ public class MachineMutator : MonoBehaviour
     {
         foreach (GameObject machine in population)
         {
-            //if (machine.GetComponent<Machine>().Fitness == 0)
-            //{
-            //    AssignMutation(machine);
-            //}
+            if (machine.GetComponent<Machine>().Fitness == 0)
+            {
+                AssignMutation(machine);
+            }
         }
-        AssignMutation(population[0]);
+        //AssignMutation(population[0]);
         yield return null;
     }
 
@@ -65,7 +65,7 @@ public class MachineMutator : MonoBehaviour
 
         int index = Random.Range(0, mSegs.Count);
 
-        Debug.Log("mutating: " + machine.name + " at: " + index + " -> " + tryMutationDelegate.Method.Name);
+        //Debug.Log("mutating: " + machine.name + " at: " + index + " -> " + tryMutationDelegate.Method.Name);
 
         //disable latter half of machine
         SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), false);
@@ -84,7 +84,7 @@ public class MachineMutator : MonoBehaviour
                 mutationDelegate(mSegs, index);
                 MoveMachine(mSegs.GetRange(index, mSegs.Count - index), offset);
                 SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), true);
-                Debug.Log("mutation last successfull");
+                //Debug.Log("mutation last successfull");
                 return;
             } else
             {
@@ -98,10 +98,10 @@ public class MachineMutator : MonoBehaviour
                         mutationDelegate(mSegs, index);
                         MoveMachine(mSegs.GetRange(index, mSegs.Count - index), offset);
                         SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), true);
-                        Debug.Log("mutation normal successfull");
+                        //Debug.Log("mutation normal successfull");
                         return;
                     }
-                    Debug.Log("fail");
+                    //Debug.Log("fail");
                 }
                 else
                 {
@@ -111,10 +111,10 @@ public class MachineMutator : MonoBehaviour
                         mutationDelegate(mSegs, index);
                         MoveMachineMirrored(mSegs.GetRange(index, mSegs.Count - index), offset);
                         SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), true);
-                        Debug.Log("mutation mirrored successfull");
+                        //Debug.Log("mutation mirrored successfull");
                         return;
                     }
-                    Debug.Log("mirr fail");
+                    //Debug.Log("mirr fail");
                 }
             }
         }
@@ -125,7 +125,7 @@ public class MachineMutator : MonoBehaviour
         {
             mSegs.Remove(newSegment);
         }
-        //Destroy(newSegment);
+        Destroy(newSegment);
         SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), true);
     }
 
@@ -228,9 +228,9 @@ public class MachineMutator : MonoBehaviour
         foreach (GameObject seg in machine)
         {
             //check for any collision
-            if (!seg.GetComponent<SegmentLogic>().CheckEnoughRoom(seg.GetComponent<SegmentPart>().Input, seg.GetComponent<SegmentPart>().Output, offset, "", false))
+            if (!seg.GetComponent<SegmentLogic>().CheckSegmentOverlap(offset, "", false, false, 0))
             {
-                Debug.Log("col" + seg.name);
+                //Debug.Log("col" + seg.name);
                 return false;
             }
         }
@@ -239,28 +239,22 @@ public class MachineMutator : MonoBehaviour
 
     private bool CheckCollisionMirrored(List<GameObject> machine, Vector2 offset)
     {
-        Vector2 inp = Vector2.zero;
-        Vector2 outp = Vector2.zero;
+        Vector2 newOffset = offset;
+        Vector2 prevOutput = Vector2.zero;
 
         for(int i = 0; i < machine.Count; i++)
         {
-            //calculate mirrored input
-            //i = 0 -> input = input + offset
-            //else -> input = previously calculated output
-            if(i == 0)
+            if (i > 0)
             {
-                inp = machine[i].GetComponent<SegmentPart>().Input + offset;
-            } else
-            {
-                inp = outp;
+                //calculate new offset: output - input where output is output of last iteration
+                newOffset = prevOutput - machine[i].GetComponent<SegmentPart>().Input;
             }
-            //calculate mirrored output, output = input + (ouput - input) * (-1,1)
-            Vector2 segDist = (machine[i].GetComponent<SegmentPart>().Output - machine[i].GetComponent<SegmentPart>().Input) * new Vector2(-1, 1);
-            outp = inp + segDist;
+            //calculate mirrored output location, newOutput = input + offset + (output - input) * (-1,1)
+            prevOutput = machine[i].GetComponent<SegmentPart>().Input + newOffset + (machine[i].GetComponent<SegmentPart>().Output - machine[i].GetComponent<SegmentPart>().Input) * new Vector2(-1, 1);
+
             //check for any collision
-            if (!machine[i].GetComponent<SegmentLogic>().CheckEnoughRoomMirrored(inp, outp, offset))
+            if (!machine[i].GetComponent<SegmentLogic>().CheckSegmentOverlap(newOffset, "", false, true, 0))
             {
-                Debug.Log("col" + machine[i].name);
                 return false;
             }
         }

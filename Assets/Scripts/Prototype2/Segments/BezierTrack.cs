@@ -90,6 +90,12 @@ public class BezierTrack : SegmentPart
         */
         mirrorAnchor.transform.localScale = new Vector3(mirrorAnchor.transform.localScale.x * (-1), 1, 1);
 
+        if (BallPiece != null)
+        {
+            BallSpawnPos = BallPiece.transform.position;
+            BallSpawnRotation = BallPiece.transform.rotation;
+        }
+
         gameObject.transform.parent = parent;
         Destroy(mirrorAnchor);
     }

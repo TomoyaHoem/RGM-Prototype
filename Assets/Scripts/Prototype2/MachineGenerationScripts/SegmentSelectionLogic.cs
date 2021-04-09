@@ -58,15 +58,7 @@ public class SegmentSelectionLogic : MonoBehaviour
     public bool CheckSegmentRoom(GameObject segHol)
     {
         SegmentLogic segLog = segHol.GetComponent<SegmentLogic>();
-        SegmentPart segPart = segHol.GetComponent<SegmentPart>();
-
-        if (segLog.CheckEnoughRoom(segPart.Input, segPart.Output))
-        {
-            return true;
-        } else
-        {
-            return false;
-        }
+        return segLog.CheckSegmentOverlap(Vector2.zero, "", false, false, 10);
     }
 
     public List<int> RemainingSegments(List<int> triedSegments)

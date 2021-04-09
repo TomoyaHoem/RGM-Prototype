@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: EATest
   m_EditorClassIdentifier: 
   populationSize: 1
-  mutationRate: 1
-  iterations: 1
+  mutationRate: 0
+  iterations: 0
   evolutionMethod: 1
   frequency: 1
   linearity: 1
