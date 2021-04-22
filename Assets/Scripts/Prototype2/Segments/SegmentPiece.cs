@@ -17,7 +17,17 @@ public class SegmentPiece : MonoBehaviour
         {
             WasActivatedAndPassed = true;
             Active = false;
-            gameObject.GetComponent<SpriteRenderer>().color = Color.green;
+            if (gameObject.GetComponent<SpriteRenderer>() != null)
+            {
+                gameObject.GetComponent<SpriteRenderer>().color = Color.green;
+            }
+            else
+            {
+                foreach (Transform child in gameObject.transform)
+                {
+                    child.gameObject.GetComponent<SpriteRenderer>().color = Color.green;
+                }
+            }
             collision.gameObject.GetComponent<SegmentPiece>().Activate();
         }
     }
@@ -27,7 +37,16 @@ public class SegmentPiece : MonoBehaviour
         if (!WasActivatedAndPassed)
         {
             Active = true;
-            gameObject.GetComponent<SpriteRenderer>().color = Color.red;
+            if(gameObject.GetComponent<SpriteRenderer>() != null)
+            {
+                gameObject.GetComponent<SpriteRenderer>().color = Color.red;
+            } else
+            {
+                foreach(Transform child in gameObject.transform)
+                {
+                    child.gameObject.GetComponent<SpriteRenderer>().color = Color.red;
+                }
+            }
             SegmentPieceCollisionEvent?.Invoke(gameObject);
         }
     }

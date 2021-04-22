@@ -110,6 +110,10 @@ public class Machine : MonoBehaviour
             foreach(Transform child in seg.transform)
             {
                 if(child.tag == "SegmentPiece") SegmentPieces.Add(child.gameObject);
+                foreach(Transform c in child.transform)
+                {
+                    if (c.tag == "SegmentPiece") SegmentPieces.Add(c.gameObject);
+                }
             }
         }
     }

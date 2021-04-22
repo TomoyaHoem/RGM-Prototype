@@ -29,6 +29,13 @@ public class MachineTester : MonoBehaviour
                 {
                     child.GetComponent<SegmentPiece>().SegmentPieceCollisionEvent += OnSegmentPieceCollision;
                 }
+                foreach (Transform c in child.transform)
+                {
+                    if (c.tag == "SegmentPiece")
+                    {
+                        c.GetComponent<SegmentPiece>().SegmentPieceCollisionEvent += OnSegmentPieceCollision;
+                    }
+                }
             }
         }
 
@@ -59,6 +66,13 @@ public class MachineTester : MonoBehaviour
                 if (child.tag == "SegmentPiece")
                 {
                     child.GetComponent<SegmentPiece>().SegmentPieceCollisionEvent -= OnSegmentPieceCollision;
+                }
+                foreach (Transform c in child.transform)
+                {
+                    if (c.tag == "SegmentPiece")
+                    {
+                        c.GetComponent<SegmentPiece>().SegmentPieceCollisionEvent -= OnSegmentPieceCollision;
+                    }
                 }
             }
         }

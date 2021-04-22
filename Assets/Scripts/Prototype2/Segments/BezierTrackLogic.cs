@@ -39,9 +39,9 @@ public class BezierTrackLogic : SegmentLogic
         List<Vector2> midPoints = CalculateMidPoints(numPoints, prevDir, output);
 
         //input ramp 0.5, output 1
-        Path path = new Path(BezierTrack.Input + new Vector2(prevDir.x * 0.5f, -0.68f), new Vector2(BezierTrack.Input.x + output.x - 1 * prevDir.x, BezierTrack.Input.y + output.y - 0.68f), prevDir, midPoints);
+        Path path = new Path(BezierTrack.Input + new Vector2(prevDir.x * 0.5f, -0.68f), new Vector2(BezierTrack.Input.x + output.x - 1.5f * prevDir.x, BezierTrack.Input.y + output.y - 0.68f), prevDir, midPoints);
 
-        BezierTrack.EvenPoints = path.CalculateEvenlySpacedPoints(spacing, resolution);
+        BezierTrack.EvenPoints = path.CalculateEvenlySpacedPoints(spacing, 0.5f, resolution);
 
         //Debug.Log(output);
 
@@ -88,53 +88,6 @@ public class BezierTrackLogic : SegmentLogic
             BezierTrack.BallSpawnRotation = BezierTrack.BallPiece.transform.rotation;
             BezierTrack.BallPiece.GetComponent<Rigidbody2D>().mass = Random.Range(1, 5);
         }
-    }
-
-    public override bool CheckEnoughRoom(Vector2 input, Vector2 output)
-    {
-        CalcBoundingBox(BezierTrack.EvenPoints);
-
-        if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null)
-        {
-            //Debug.Log(Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner).name);
-            return false;
-        }
-        return true;
-    }
-
-    public override bool CheckEnoughRoom(Vector2 input, Vector2 output, Vector2 offset, string s, bool mode)
-    {
-        CalcBoundingBox(BezierTrack.EvenPoints);
-
-        Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
-
-        if (collider != null && (collider.name.Equals(s) == mode))
-        {
-            //Debug.Log(Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner));
-            return false;
-        }
-        return true;
-    }
-
-    public override bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset, string s, bool mode)
-    {
-        CalcBoundingBox(BezierTrack.EvenPoints);
-        //mirror bounding box
-        //Debug.Log(input + " , " + BezierTrack.Input);
-        Vector2 inputOffset = input - BezierTrack.Input;
-        boundingBoxBottomCorner = new Vector2(input.x + (-0.1f) * BezierTrack.InputDirection.x, boundingBoxBottomCorner.y + inputOffset.y);
-        boundingBoxTopCorner = new Vector2(output.x + (0.1f) * BezierTrack.InputDirection.x, boundingBoxTopCorner.y + inputOffset.y);
-
-        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.yellow, 100);
-
-        Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
-
-        if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null && (collider.name.Equals(s) == mode))
-        {
-            //Debug.Log(collider);
-            return false;
-        }
-        return true;
     }
 
     private void CalcBoundingBox(Vector2[] points)
@@ -203,4 +156,54 @@ public class BezierTrackLogic : SegmentLogic
         }
         return true;
     }
+
+    /*
+     * DEPRECATED
+    public override bool CheckEnoughRoom(Vector2 input, Vector2 output)
+    {
+        CalcBoundingBox(BezierTrack.EvenPoints);
+
+        if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null)
+        {
+            //Debug.Log(Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner).name);
+            return false;
+        }
+        return true;
+    }
+
+    public override bool CheckEnoughRoom(Vector2 input, Vector2 output, Vector2 offset, string s, bool mode)
+    {
+        CalcBoundingBox(BezierTrack.EvenPoints);
+
+        Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
+
+        if (collider != null && (collider.name.Equals(s) == mode))
+        {
+            //Debug.Log(Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner));
+            return false;
+        }
+        return true;
+    }
+
+    public override bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset, string s, bool mode)
+    {
+        CalcBoundingBox(BezierTrack.EvenPoints);
+        //mirror bounding box
+        //Debug.Log(input + " , " + BezierTrack.Input);
+        Vector2 inputOffset = input - BezierTrack.Input;
+        boundingBoxBottomCorner = new Vector2(input.x + (-0.1f) * BezierTrack.InputDirection.x, boundingBoxBottomCorner.y + inputOffset.y);
+        boundingBoxTopCorner = new Vector2(output.x + (0.1f) * BezierTrack.InputDirection.x, boundingBoxTopCorner.y + inputOffset.y);
+
+        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.yellow, 100);
+
+        Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
+
+        if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null && (collider.name.Equals(s) == mode))
+        {
+            //Debug.Log(collider);
+            return false;
+        }
+        return true;
+    }
+    */
 }

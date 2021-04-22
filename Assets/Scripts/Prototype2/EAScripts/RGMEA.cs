@@ -37,7 +37,7 @@ public class RGMEA : MonoBehaviour
         //EA-Setup -> Population, Scripts
         EASetup();
 
-        Physics2D.autoSimulation = false;
+        Physics2D.autoSimulation = true;
 
         //Debug.Log("Press Space to start evolution.");
 

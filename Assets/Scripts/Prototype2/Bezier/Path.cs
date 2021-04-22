@@ -62,7 +62,7 @@ public class Path
         ////Vector2 controlP2 = newAnchor - new Vector2(Mathf.Cos(radians), Mathf.Sin(radians)) * controlPointDistance * dir.x;
     }
 
-    public Vector2[] CalculateEvenlySpacedPoints(float spacing, float resolution = 1)
+    public Vector2[] CalculateEvenlySpacedPoints(float spacing, float startEndLength, float resolution = 1)
     {
         List<Vector2> evenlySpacedPoints = new List<Vector2>();
         evenlySpacedPoints.Add(points[0]);
@@ -96,8 +96,8 @@ public class Path
         }
 
         //insert and add point for beginning and end platform
-        evenlySpacedPoints.Insert(0, new Vector2(evenlySpacedPoints[0].x - 0.5f * direction.x, evenlySpacedPoints[0].y));
-        evenlySpacedPoints.Add(new Vector2(Mathf.Round(evenlySpacedPoints[evenlySpacedPoints.Count - 1].x) + 1f * direction.x, evenlySpacedPoints[evenlySpacedPoints.Count - 1].y));
+        evenlySpacedPoints.Insert(0, new Vector2(evenlySpacedPoints[0].x - startEndLength * direction.x, evenlySpacedPoints[0].y));
+        evenlySpacedPoints.Add(new Vector2(Mathf.Round(evenlySpacedPoints[evenlySpacedPoints.Count - 1].x) + (startEndLength + 1.5f) * direction.x, evenlySpacedPoints[evenlySpacedPoints.Count - 1].y));
 
         return evenlySpacedPoints.ToArray();
     }

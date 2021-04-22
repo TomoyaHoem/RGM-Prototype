@@ -56,6 +56,76 @@ public class MillLogic : SegmentLogic
         Mill.MillSpawnRotation = Mill.transform.rotation;
     }
 
+    private void CalcBoundingBox()
+    {
+        float a = Mill.Input.x + 0.1f * Mill.InputDirection.x;
+        float b = Mill.Output.x + (Mill.Scale * 0.5f + 2.9f) * Mill.InputDirection.x;
+
+        float c = Mill.Input.y - 0.9f * Mill.OutputDirection.y;
+        float d = Mill.Output.y + 0.9f * Mill.OutputDirection.y;
+
+        float minX = Mathf.Min(a, b);
+        float maxX = Mathf.Max(a, b);
+
+        float minY = Mathf.Min(c, d);
+        float maxY = Mathf.Max(c, d);
+
+        boundingBoxBottomCorner = new Vector2(minX, minY);
+        boundingBoxTopCorner = new Vector2(maxX, maxY);
+    }
+
+    public override bool CheckSegmentOverlap(Vector2 offset, string s, bool mode, bool mirrored, float duration)
+    {
+        CalcBoundingBox();
+
+        //mirror if needed 
+        if (mirrored)
+        {
+            //calculate signed distance between input and output
+            float xDistanceSegment = (boundingBoxBottomCorner.x - boundingBoxTopCorner.x - 0.2f) * Mill.InputDirection.x;
+            
+            //mirror bounding box by adding signed distance
+            boundingBoxBottomCorner.x += xDistanceSegment;
+            boundingBoxTopCorner.x += xDistanceSegment;
+        }
+
+        //add offset
+        boundingBoxBottomCorner += offset;
+        boundingBoxTopCorner += offset;
+
+        //draw for testing purposes
+        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.yellow, duration);
+
+        //calculate collider box
+        Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
+
+        //check for collision
+        if ((Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner)) != null && (collider.name.Equals(s) == mode))
+        {
+            return false;
+        }
+        return true;
+    }
+    
+    private void OnDrawGizmosSelected()
+    {
+        CalcBoundingBox();
+        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.red, 0);
+    }
+
+    private void DrawRectangle(Vector2 topCorner, Vector2 bottomCorner, Color color, float duration)
+    {
+        Vector2 topOppositeCorner = new Vector2(bottomCorner.x, topCorner.y);
+        Vector2 bottomOppositeCorner = new Vector2(topCorner.x, bottomCorner.y);
+
+        Debug.DrawLine(topCorner, topOppositeCorner, color, duration);
+        Debug.DrawLine(topOppositeCorner, bottomCorner, color, duration);
+        Debug.DrawLine(bottomCorner, bottomOppositeCorner, color, duration);
+        Debug.DrawLine(bottomOppositeCorner, topCorner, color, duration);
+    }
+
+    /*
+     * DEPRECATED
     public override bool CheckEnoughRoom(Vector2 input, Vector2 output)
     {
         CalculateBoundingBoxes(input, output);
@@ -109,72 +179,5 @@ public class MillLogic : SegmentLogic
         //output -1 unit in dirChange direction 
         boundingBoxBottomCorner = new Vector2(output.x - 2.9f * Mill.InputDirection.x, output.y + 0.9f * Mill.OutputDirection.y);
     }
-
-    private void OnDrawGizmosSelected()
-    {
-        CalculateBoundingBoxes(Mill.Input, Mill.Output);
-        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.red, 0);
-    }
-
-    private void DrawRectangle(Vector2 topCorner, Vector2 bottomCorner, Color color, float duration)
-    {
-        Vector2 topOppositeCorner = new Vector2(bottomCorner.x, topCorner.y);
-        Vector2 bottomOppositeCorner = new Vector2(topCorner.x, bottomCorner.y);
-
-        Debug.DrawLine(topCorner, topOppositeCorner, color, duration);
-        Debug.DrawLine(topOppositeCorner, bottomCorner, color, duration);
-        Debug.DrawLine(bottomCorner, bottomOppositeCorner, color, duration);
-        Debug.DrawLine(bottomOppositeCorner, topCorner, color, duration);
-    }
-
-    private void CalcBoundingBox()
-    {
-        float a = Mill.Input.x + 0.1f * Mill.InputDirection.x;
-        float b = Mill.Output.x + (Mill.Scale * 0.5f + 2.9f) * Mill.InputDirection.x;
-
-        float c = Mill.Input.y - 0.9f * Mill.OutputDirection.y;
-        float d = Mill.Output.y + 0.9f * Mill.OutputDirection.y;
-
-        float minX = Mathf.Min(a, b);
-        float maxX = Mathf.Max(a, b);
-
-        float minY = Mathf.Min(c, d);
-        float maxY = Mathf.Max(c, d);
-
-        boundingBoxBottomCorner = new Vector2(minX, minY);
-        boundingBoxTopCorner = new Vector2(maxX, maxY);
-    }
-
-    public override bool CheckSegmentOverlap(Vector2 offset, string s, bool mode, bool mirrored, float duration)
-    {
-        CalcBoundingBox();
-
-        //mirror if needed 
-        if (mirrored)
-        {
-            //calculate signed distance between input and output
-            float xDistanceSegment = (boundingBoxBottomCorner.x - boundingBoxTopCorner.x - 0.2f) * Mill.InputDirection.x;
-            
-            //mirror bounding box by adding signed distance
-            boundingBoxBottomCorner.x += xDistanceSegment;
-            boundingBoxTopCorner.x += xDistanceSegment;
-        }
-
-        //add offset
-        boundingBoxBottomCorner += offset;
-        boundingBoxTopCorner += offset;
-
-        //draw for testing purposes
-        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.yellow, duration);
-
-        //calculate collider box
-        Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
-
-        //check for collision
-        if ((Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner)) != null && (collider.name.Equals(s) == mode))
-        {
-            return false;
-        }
-        return true;
-    }
+    */
 }

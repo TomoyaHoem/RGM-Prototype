@@ -111,6 +111,8 @@ public class BallLogic : SegmentLogic
         ramp.transform.localScale = new Vector3((startToEndDir.magnitude / ramp.GetComponent<SpriteRenderer>().size.x) - 0.0001f, 1f, 1f);
     }
 
+    /*
+     * OLD
     public override bool CheckEnoughRoom(Vector2 input, Vector2 output)
     {
         CalculateBoundingBoxes(input, output);
@@ -228,6 +230,7 @@ public class BallLogic : SegmentLogic
         //no collision
         return true;
     }
+    */
 
     private void CalculateBoundingBoxes(Vector2 input, Vector2 output)
     {

@@ -32,7 +32,7 @@ public class BezierTest : MonoBehaviour
         input = transform.position;
 
         float ranH = Random.Range(-5, .5f);
-        int ranL = Random.Range(4, 16) * (int)direction.x;
+        int ranL = Random.Range(12, 28) * (int)direction.x;
 
         //Debug.Log("rampH: " + ranH + " , rampL: " + ranL);
 
@@ -63,7 +63,7 @@ public class BezierTest : MonoBehaviour
             g.transform.parent = pathHolder.transform;
         }
 
-        evenPoints = path.CalculateEvenlySpacedPoints(spacing, resolution);
+        evenPoints = path.CalculateEvenlySpacedPoints(spacing, 0.5f, resolution);
         foreach(Vector2 p in evenPoints)
         {
             GameObject g = GameObject.CreatePrimitive(PrimitiveType.Sphere);

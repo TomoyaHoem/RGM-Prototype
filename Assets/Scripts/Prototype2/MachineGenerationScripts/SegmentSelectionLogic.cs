@@ -23,6 +23,8 @@ public class SegmentSelectionLogic : MonoBehaviour
         possibleSegments.Add(1);
         possibleSegments.Add(2);
         possibleSegments.Add(3);
+        possibleSegments.Add(4);
+        possibleSegments.Add(5);
     }
 
     //decide which segment to add based on ID
@@ -48,6 +50,14 @@ public class SegmentSelectionLogic : MonoBehaviour
                 segHol.AddComponent<MillLogic>();
                 segHol.GetComponent<MillLogic>().Mill = segHol.AddComponent<Mill>();
                 segHol.GetComponent<Mill>().SegmentID = 3; //MILL UP
+                break;
+            case 4:
+                segHol.AddComponent<HammerLogic>();
+                segHol.GetComponent<HammerLogic>().Hammer = segHol.AddComponent<Hammer>();
+                break;
+            case 5:
+                segHol.AddComponent<CarTrackLogic>();
+                segHol.GetComponent<CarTrackLogic>().Car = segHol.AddComponent<Car>();
                 break;
             default:
                 Debug.Log("Could not identify segmentID: " + segID);

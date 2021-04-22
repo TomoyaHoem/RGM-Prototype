@@ -132,47 +132,6 @@ public class DominoLogic : SegmentLogic
         }
     }
 
-    public override bool CheckEnoughRoom(Vector2 input, Vector2 output)
-    {
-        CalculateBoundingBoxes(input, output, Vector2.zero);
-
-        if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null)
-        {
-            //Debug.Log(Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner));
-            return false;
-        }
-        return true;
-    }
-
-    public override bool CheckEnoughRoom(Vector2 input, Vector2 output, Vector2 offset, string s, bool mode)
-    {
-        CalculateBoundingBoxes(input + offset, output + offset, offset);
-
-        Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
-
-        if (collider != null && (collider.name.Equals(s) == mode))
-        {
-            //Debug.Log(Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner));
-            return false;
-        }
-        return true;
-    }
-
-    public override bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset, string s, bool mode)
-    {
-        CalculateBoundingBoxes(input, output, offset);
-        //Debug.Log(gameObject.name + boundingBoxTopCorner + boundingBoxBottomCorner);
-        Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
-
-        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.yellow, 100);
-
-        if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null && (collider.name.Equals(s) == mode))
-        {
-            return false;
-        }
-        return true;
-    }
-
     private void CalculateBoundingBoxes(Vector2 input, Vector2 output, Vector2 offset)
     {
         float minY = float.PositiveInfinity, maxY = float.NegativeInfinity;
@@ -192,23 +151,6 @@ public class DominoLogic : SegmentLogic
 
         boundingBoxBottomCorner = new Vector2(minX + 0.1f, minY - 2.5f);
         boundingBoxTopCorner = new Vector2(maxX - 0.1f, maxY + 0.9f);
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        CalculateBoundingBoxes(Domino.Input, Domino.Output, Vector2.zero);
-        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.red, 0);
-    }
-
-    private void DrawRectangle(Vector2 topCorner, Vector2 bottomCorner, Color color, float duration)
-    {
-        Vector2 topOppositeCorner = new Vector2(bottomCorner.x, topCorner.y);
-        Vector2 bottomOppositeCorner = new Vector2(topCorner.x, bottomCorner.y);
-
-        Debug.DrawLine(topCorner, topOppositeCorner, color, duration);
-        Debug.DrawLine(topOppositeCorner, bottomCorner, color, duration);
-        Debug.DrawLine(bottomCorner, bottomOppositeCorner, color, duration);
-        Debug.DrawLine(bottomOppositeCorner, topCorner, color, duration);
     }
 
     private void CalcBoundingBox()
@@ -261,4 +203,65 @@ public class DominoLogic : SegmentLogic
         }
         return true;
     }
+
+    private void OnDrawGizmosSelected()
+    {
+        CalcBoundingBox();
+        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.red, 0);
+    }
+
+    private void DrawRectangle(Vector2 topCorner, Vector2 bottomCorner, Color color, float duration)
+    {
+        Vector2 topOppositeCorner = new Vector2(bottomCorner.x, topCorner.y);
+        Vector2 bottomOppositeCorner = new Vector2(topCorner.x, bottomCorner.y);
+
+        Debug.DrawLine(topCorner, topOppositeCorner, color, duration);
+        Debug.DrawLine(topOppositeCorner, bottomCorner, color, duration);
+        Debug.DrawLine(bottomCorner, bottomOppositeCorner, color, duration);
+        Debug.DrawLine(bottomOppositeCorner, topCorner, color, duration);
+    }
+
+    /*
+    DEPRECATED
+    public override bool CheckEnoughRoom(Vector2 input, Vector2 output)
+    {
+        CalculateBoundingBoxes(input, output, Vector2.zero);
+
+        if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null)
+        {
+            //Debug.Log(Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner));
+            return false;
+        }
+        return true;
+    }
+
+    public override bool CheckEnoughRoom(Vector2 input, Vector2 output, Vector2 offset, string s, bool mode)
+    {
+        CalculateBoundingBoxes(input + offset, output + offset, offset);
+
+        Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
+
+        if (collider != null && (collider.name.Equals(s) == mode))
+        {
+            //Debug.Log(Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner));
+            return false;
+        }
+        return true;
+    }
+
+    public override bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset, string s, bool mode)
+    {
+        CalculateBoundingBoxes(input, output, offset);
+        //Debug.Log(gameObject.name + boundingBoxTopCorner + boundingBoxBottomCorner);
+        Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);
+
+        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.yellow, 100);
+
+        if (Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner) != null && (collider.name.Equals(s) == mode))
+        {
+            return false;
+        }
+        return true;
+    }
+    */
 }

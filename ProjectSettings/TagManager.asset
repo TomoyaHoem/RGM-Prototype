@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - SegmentPiece
+  - Ignore
+  - Piston
   layers:
   - Default
   - TransparentFX

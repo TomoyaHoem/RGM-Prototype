@@ -46,6 +46,9 @@ public class Mill : SegmentPart
                 MillSpawnRotation = child.rotation;
             }
         }
+        //copy Scale
+        Scale = parent.GetComponent<Mill>().Scale;
+
         //copy io + offset
         CopyIO(parent.GetComponent<SegmentPart>(), offset);
     }
