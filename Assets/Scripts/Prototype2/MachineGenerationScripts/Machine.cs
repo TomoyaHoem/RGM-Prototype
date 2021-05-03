@@ -117,4 +117,30 @@ public class Machine : MonoBehaviour
             }
         }
     }
+
+    public void MoveMachineTo(Vector2 newLocation)
+    {
+        //calculate offset between new location and current
+        Vector2 offset = newLocation - (Vector2)gameObject.transform.position;
+
+        //move all segments unparented 
+        foreach (GameObject segment in Segments)
+        {
+            segment.transform.parent = null;
+            segment.GetComponent<SegmentPart>().MoveSegmentBy(offset);
+        }
+
+        //move rest of machine
+        gameObject.transform.position = newLocation;
+       
+        //reparent all segments
+        foreach (GameObject segment in Segments)
+        {
+            segment.transform.parent = gameObject.transform;
+        }
+
+        //reconfigure all colliders
+        gameObject.SetActive(false);
+        gameObject.SetActive(true);
+    }
 }

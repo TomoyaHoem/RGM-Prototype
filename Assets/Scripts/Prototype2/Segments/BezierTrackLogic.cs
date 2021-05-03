@@ -53,7 +53,7 @@ public class BezierTrackLogic : SegmentLogic
         List<Vector2> points = new List<Vector2>();
 
         float start = BezierTrack.Input.x + prevDir.x * 0.5f;
-        float end = start + output.x - 1.5f * prevDir.x;
+        float end = BezierTrack.Input.x + output.x - 1.5f * prevDir.x;
         float dst = end - start;
         float step = dst / (numPoints + 1);
 
@@ -83,7 +83,7 @@ public class BezierTrackLogic : SegmentLogic
         if(Random.Range(0, 2) > 0)
         {
             //Marble
-            BezierTrack.BallSpawnPos = new Vector2(BezierTrack.EvenPoints[0].x + 0.2f * BezierTrack.InputDirection.x, BezierTrack.EvenPoints[0].y + meshWidth);
+            BezierTrack.BallSpawnPos = new Vector2(BezierTrack.EvenPoints[0].x + 0.175f * BezierTrack.InputDirection.x, BezierTrack.EvenPoints[0].y + meshWidth);
             BezierTrack.BallPiece = Instantiate(Resources.Load("Prefabs/Ball"), BezierTrack.BallSpawnPos, Quaternion.identity, gameObject.transform) as GameObject;
             BezierTrack.BallSpawnRotation = BezierTrack.BallPiece.transform.rotation;
             BezierTrack.BallPiece.GetComponent<Rigidbody2D>().mass = Random.Range(1, 5);

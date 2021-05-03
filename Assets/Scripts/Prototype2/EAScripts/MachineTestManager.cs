@@ -21,11 +21,13 @@ public class MachineTestManager : MonoBehaviour
     private int finishedTasks;
 
     //simulate max 100 segments at a time
-    private int maxParallelTasks = 100 / SettingsReader.Instance.MachineSettings.NumSegments;
+    private int maxParallelTasks;
 
     private void Awake()
     {
         mainScene = SceneManager.GetActiveScene();
+
+        maxParallelTasks = 40 / SettingsReader.Instance.MachineSettings.NumSegments > 0 ? 40 / SettingsReader.Instance.MachineSettings.NumSegments : 1;
 
         CreateSceneParameters sceneParam = new CreateSceneParameters(LocalPhysicsMode.Physics2D);
         simulationScene = SceneManager.CreateScene("Machine Simulation", sceneParam);
@@ -62,7 +64,7 @@ public class MachineTestManager : MonoBehaviour
 
         while(finishedTasks < numTasks)
         {
-            if(curTasks >= maxParallelTasks || taskID >= numTasks)
+            if (curTasks >= maxParallelTasks || taskID >= numTasks)
             {
                 yield return null;
             } else

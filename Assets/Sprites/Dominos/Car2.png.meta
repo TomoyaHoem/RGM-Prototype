@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 43383dc1439483d4b931b2abeab33f07
+guid: c2badec3994630243aa140ea9cc6e510
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -8,6 +8,21 @@ TextureImporter:
   - first:
       213: -7641860706416531140
     second: Car_1
+  - first:
+      213: 9016264943248534526
+    second: Car_0
+  - first:
+      213: -5965951127244483028
+    second: Car_1
+  - first:
+      213: -2074263735804176933
+    second: Car2_0
+  - first:
+      213: 5479415226505456353
+    second: Car2_1
+  - first:
+      213: -8439602558819611816
+    second: Car2_2
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -105,13 +120,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Car_0
+      name: Car2_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 51
+        y: 50
         width: 264
-        height: 88
+        height: 105
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -119,17 +134,38 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: bcd07eaa806a01290800000000000000
-      internalID: -7921649188387484213
+      spriteID: bd5dae84f1cb633e0800000000000000
+      internalID: -2074263735804176933
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Car_1
+      name: Car2_1
       rect:
         serializedVersion: 2
-        x: 24
+        x: 16
+        y: 33
+        width: 80
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ea69b80e1bca0c40800000000000000
+      internalID: 5479415226505456353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Car2_2
+      rect:
+        serializedVersion: 2
+        x: 216
         y: 0
         width: 48
         height: 48
@@ -140,8 +176,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c39e6030d28a2f590800000000000000
-      internalID: -7641860706416531140
+      spriteID: 85b441c003280ea80800000000000000
+      internalID: -8439602558819611816
       vertices: []
       indices: 
       edges: []

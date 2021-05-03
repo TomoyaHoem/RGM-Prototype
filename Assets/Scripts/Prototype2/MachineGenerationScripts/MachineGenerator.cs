@@ -27,24 +27,26 @@ public class MachineGenerator : MonoBehaviour
     //Event triggers when MachineGeneration finishes or Stops
     public event Action machineCompleteEvent;
 
-    public void GenerateNewMachine()
+    public void GenerateNewMachine(int numSegments)
     {
         float machineArea = SettingsReader.Instance.MachineSettings.MachineArea;
-        int numSegments = SettingsReader.Instance.MachineSettings.NumSegments;
 
         MachineSetup(machineArea);
 
         //restriction area
         GenArea(machineArea);
 
-        //start direction & start object
-        /* REPLACE AUTO START AND DIR BY SPECIAL START SEGMENT? */
-        GenAutoStart(startDir);
+        if (numSegments > 0)
+        {
+            //start direction & start object
+            /* REPLACE AUTO START AND DIR BY SPECIAL START SEGMENT? */
+            GenAutoStart(startDir);
 
-        //init TriedSeg
-        TriedSegments = new List<List<int>>();
-        backtrackAmount = (int)Mathf.Sqrt(numSegments);
-
+            //init TriedSeg
+            TriedSegments = new List<List<int>>();
+            backtrackAmount = (int)Mathf.Sqrt(numSegments);
+        }
+       
         //generate machine
         machineGeneration = new Task(GenerateMachineSegments(numSegments));
     }
@@ -62,7 +64,7 @@ public class MachineGenerator : MonoBehaviour
 
     public void StopMachineGeneration()
     {
-        if(machineGeneration != null)
+        if (machineGeneration != null)
         {
             machineGeneration.Stop();
         }
@@ -91,12 +93,12 @@ public class MachineGenerator : MonoBehaviour
 
     public IEnumerator GenerateMachineSegments(int numSegments)
     {
-        while(machine.Segments.Count < numSegments)
+        while (machine.Segments.Count < numSegments)
         {
             Task t = new Task(GenerateSegment(machine.Segments.Count));
             while (t.Running)
             {
-                if(stuckCount > numSegments*2)
+                if (stuckCount > numSegments * 2)
                 {
                     StopMachineGeneration();
                 }
@@ -132,18 +134,19 @@ public class MachineGenerator : MonoBehaviour
 
         bool found = false;
 
-        while(!found && remaining.Count > 0)
+        while (!found && remaining.Count > 0)
         {
             //sample random segment from remaining list
             int sampleR = UnityEngine.Random.Range(0, remaining.Count);
-            int segID = remaining[sampleR]; remaining.Remove(segID); //segID = 0;
+            int segID = remaining[sampleR]; remaining.Remove(segID); //segID = 1;
             //assign segment & logic
             sL.AssignSegment(segHol, segID);
             //assign in- / output (first seg or intermitten)
-            if(machine.Segments.Count == 0)
+            if (machine.Segments.Count == 0)
             {
                 sL.SetSegmentIO(segHol, transform.position, startDir);
-            } else
+            }
+            else
             {
                 sL.SetSegmentIO(segHol, machine.Segments.Last().GetComponent<SegmentPart>().Output, machine.Segments.Last().GetComponent<SegmentPart>().OutputDirection);
             }
@@ -152,7 +155,8 @@ public class MachineGenerator : MonoBehaviour
             {
                 found = true;
                 break;
-            } else
+            }
+            else
             {
                 sL.DestroySegmentComponents(segHol);
             }
@@ -164,7 +168,8 @@ public class MachineGenerator : MonoBehaviour
             segHol.GetComponent<SegmentLogic>().GenerateSegment();
             machine.Segments.Add(segHol);
             segHol.transform.parent = gameObject.transform;
-        } else
+        }
+        else
         {
             if (machine.Segments.Count == 0)
             {

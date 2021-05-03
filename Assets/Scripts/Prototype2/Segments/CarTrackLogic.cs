@@ -63,7 +63,7 @@ public class CarTrackLogic : SegmentLogic
         Vector2 fin = new Vector2(end, Car.Input.y + output.y - 0.68f);
         Vector2 con = fin - beg;
         Vector2 curP = Vector2.zero;
-        Debug.DrawLine(beg, fin, Color.white, 100f);
+        //Debug.DrawLine(beg, fin, Color.white, 100f);
 
         float pY = 0;
 
@@ -144,7 +144,7 @@ public class CarTrackLogic : SegmentLogic
         {
             //Marble
             Vector2 carSpawn = new Vector2(Car.EvenPoints[0].x + 1.25f * Car.InputDirection.x, Car.EvenPoints[0].y + meshWidth + 0.1f);
-            Car.CarPiece = Instantiate(Resources.Load("Prefabs/Car"), carSpawn, Quaternion.identity, gameObject.transform) as GameObject;
+            Car.CarPiece = Instantiate(Resources.Load("Prefabs/NewCar"), carSpawn, Quaternion.identity, gameObject.transform) as GameObject;
             
             //flip car if direction is left
             if (Car.InputDirection.x < 0)
@@ -153,10 +153,10 @@ public class CarTrackLogic : SegmentLogic
                 JointMotor2D newMotor = new JointMotor2D();
                 newMotor.motorSpeed = 1000f;
                 newMotor.maxMotorTorque = 10000f;
-                Car.CarPiece.transform.GetChild(0).GetComponent<CarTrunk>().Tire1.motor = newMotor;
-                Car.CarPiece.transform.GetChild(0).GetComponent<CarTrunk>().Tire2.motor = newMotor;
-                Car.CarPiece.transform.GetChild(0).GetComponent<CarTrunk>().Tire1.useMotor = false;
-                Car.CarPiece.transform.GetChild(0).GetComponent<CarTrunk>().Tire2.useMotor = false;
+                Car.CarPiece.transform.GetChild(0).transform.GetChild(0).GetComponent<CarEngine>().Tire1.motor = newMotor;
+                Car.CarPiece.transform.GetChild(0).transform.GetChild(0).GetComponent<CarEngine>().Tire2.motor = newMotor;
+                Car.CarPiece.transform.GetChild(0).transform.GetChild(0).GetComponent<CarEngine>().Tire1.useMotor = false;
+                Car.CarPiece.transform.GetChild(0).transform.GetChild(0).GetComponent<CarEngine>().Tire2.useMotor = false;
             }
 
             for (int i = 0; i < Car.CarPiece.transform.childCount; i++)
@@ -180,7 +180,7 @@ public class CarTrackLogic : SegmentLogic
         }
 
         boundingBoxBottomCorner = new Vector2(minX, minY - meshWidth * 2 / 3) + new Vector2(0.1f, 0);
-        boundingBoxTopCorner = new Vector2(maxX, maxY + meshWidth) - new Vector2(0.1f, -0.25f);
+        boundingBoxTopCorner = new Vector2(maxX, maxY + meshWidth + 1.5f) - new Vector2(0.1f, -0.25f);
     }
 
     private void OnDrawGizmosSelected()
@@ -221,7 +221,7 @@ public class CarTrackLogic : SegmentLogic
         boundingBoxTopCorner += offset;
 
         //draw for testing purposes
-        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.black, 100f);
+        DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.black, duration);
 
         //calculate collider box
         Collider2D collider = Physics2D.OverlapArea(boundingBoxTopCorner, boundingBoxBottomCorner);

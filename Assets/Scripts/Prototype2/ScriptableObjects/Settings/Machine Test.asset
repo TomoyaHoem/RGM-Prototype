@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99f4b345dfb48c9439e1963480f179bf, type: 3}
   m_Name: Machine Test
   m_EditorClassIdentifier: 
-  numSegments: 100
-  machineArea: 10000
+  numSegments: 10
+  machineArea: 100
   manualGeneration: 0

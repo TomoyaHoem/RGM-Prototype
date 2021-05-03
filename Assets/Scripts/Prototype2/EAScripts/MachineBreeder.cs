@@ -4,33 +4,36 @@ using UnityEngine;
 
 public class MachineBreeder : MonoBehaviour
 {
+    public MachineSpawner machineSp { get; set; }
 
     int crossSuc;
     Vector3 midOffset = Vector3.zero;
     List<Vector2> mirroredIO;
 
-    public IEnumerator BreedMachines(List<GameObject> bestParents, List<GameObject> emptyMachines)
+    public IEnumerator BreedMachines(List<GameObject> bestParents, bool feas, List<GameObject> population)
     {
-        int emptyCount = 0;
+        if (bestParents.Count < 2)
+        {
+            Debug.Log("population is too small to breed parents");
+            yield break;
+        }
 
-        Debug.Log("possible crossovers: " + emptyMachines.Count);
+        Debug.Log("possible crossovers: " + bestParents.Count/2);
         crossSuc = 0;
 
         for (int i = 0; i < bestParents.Count; i += 2)
         {
-            OnePointCrossover(bestParents[i], bestParents[i + 1], emptyMachines[emptyCount]);
-            emptyCount++;
+            OnePointCrossover(bestParents[i], bestParents[i + 1], bestParents.Count, feas, population);
         }
 
         bestParents.Clear();
-        emptyMachines.Clear();
 
         Debug.Log("successfull crossovers: " + crossSuc);
 
         yield return null;
     }
 
-    private void OnePointCrossover(GameObject parent1, GameObject parent2, GameObject empty)
+    private void OnePointCrossover(GameObject parent1, GameObject parent2, int popSize, bool feas, List<GameObject> population)
     {
         List<GameObject> p1 = parent1.GetComponent<Machine>().Segments;
         List<GameObject> p2 = parent2.GetComponent<Machine>().Segments;
@@ -59,10 +62,17 @@ public class MachineBreeder : MonoBehaviour
             if (CheckCollision(p2.GetRange(midP2, p2.Count - midP2), offset)
                 && CheckAreaFit(combined, offset, midP1, parent1.transform.position, false))
             {
+                GameObject newMachine;
+                if (feas)
+                {
+                   newMachine = machineSp.SpawnNewEmptyChildMachine(popSize, crossSuc, 4, false);
+                } else
+                {
+                   newMachine = machineSp.SpawnNewEmptyChildMachine(popSize, crossSuc, 3, false);
+                }
+                CombineMachinePartsIntoNew(midP1, midP2, parent1, parent2, newMachine, false);
                 crossSuc++;
-                DeleteEmpty(empty);
-                CombineMachinePartsIntoEmpty(midP1, midP2, parent1, parent2, empty, false);
-                empty.name += "X";
+                population.Add(newMachine);
             }
         } else
         {
@@ -70,10 +80,18 @@ public class MachineBreeder : MonoBehaviour
             if (CheckCollisionMirrored(p2.GetRange(midP2, p2.Count - midP2), offset)
                 && CheckAreaFit(combined, offset, midP1, parent1.transform.position, true))
             {
+                GameObject newMachine;
+                if (feas)
+                {
+                    newMachine = machineSp.SpawnNewEmptyChildMachine(popSize, crossSuc, 4, true);
+                }
+                else
+                {
+                    newMachine = machineSp.SpawnNewEmptyChildMachine(popSize, crossSuc, 3, true);
+                }
+                CombineMachinePartsIntoNew(midP1, midP2, parent1, parent2, newMachine, true);
                 crossSuc++;
-                DeleteEmpty(empty);
-                CombineMachinePartsIntoEmpty(midP1, midP2, parent1, parent2, empty, true);
-                empty.name += "Y";
+                population.Add(newMachine);
             }
         }
         
@@ -197,30 +215,30 @@ public class MachineBreeder : MonoBehaviour
         emptyMachine.Fitness = 0;
     }
 
-    private void CombineMachinePartsIntoEmpty(int midP1, int midP2, GameObject parent1, GameObject parent2, GameObject empty, bool mirror)
+    private void CombineMachinePartsIntoNew(int midP1, int midP2, GameObject parent1, GameObject parent2, GameObject newMachine, bool mirror)
     {
         GameObject copy;
 
         List<GameObject> parentMachine1 = parent1.GetComponent<Machine>().Segments;
         List<GameObject> parentMachine2 = parent2.GetComponent<Machine>().Segments;
 
-        Vector3 offset1 = empty.transform.position - parent1.transform.position;
-        Vector3 offset2 = (empty.transform.position + ((Vector3)parentMachine1[midP1].GetComponent<SegmentPart>().Output - parent1.transform.position)) - (Vector3)parentMachine2[midP2].GetComponent<SegmentPart>().Input;
+        Vector3 offset1 = newMachine.transform.position - parent1.transform.position;
+        Vector3 offset2 = (newMachine.transform.position + ((Vector3)parentMachine1[midP1].GetComponent<SegmentPart>().Output - parent1.transform.position)) - (Vector3)parentMachine2[midP2].GetComponent<SegmentPart>().Input;
 
         //center machines
         offset1 += midOffset;
         offset2 += midOffset;
 
-        //copy auto start of first parent into empty machine
+        //copy auto start of first parent into new machine
         copy = Instantiate(parent1.GetComponent<Machine>().AutoStart, (parent1.GetComponent<Machine>().AutoStart.transform.position + offset1), Quaternion.identity);
-        copy.transform.parent = empty.transform;
-        empty.GetComponent<Machine>().AutoStart = copy;
+        copy.transform.parent = newMachine.transform;
+        newMachine.GetComponent<Machine>().AutoStart = copy;
         copy.GetComponent<AutoStart>().PistonDirection = parent1.GetComponent<Machine>().AutoStart.GetComponent<AutoStart>().PistonDirection;
 
         //copy first parents segments up until index, then second parents segments
         for (int i = 0; i <= midP1; i++)
         {
-            CopySegment(parentMachine1[i].gameObject, offset1, empty, false); 
+            CopySegment(parentMachine1[i].gameObject, offset1, newMachine, false); 
         }
 
         for (int i = midP2; i < parentMachine2.Count; i++)
@@ -231,8 +249,12 @@ public class MachineBreeder : MonoBehaviour
                 offset2 = ((Vector3)parentMachine2[i - 1].GetComponent<SegmentPart>().Input + offset2) - (Vector3)parentMachine2[i].GetComponent<SegmentPart>().Input;
             }
 
-            CopySegment(parentMachine2[i].gameObject, offset2, empty, mirror);
+            CopySegment(parentMachine2[i].gameObject, offset2, newMachine, mirror);
         }
+
+        //reset collider
+        newMachine.SetActive(false);
+        newMachine.SetActive(true);
     }
 
     public void CopySegment(GameObject seg, Vector3 offset, GameObject empty, bool mirror)

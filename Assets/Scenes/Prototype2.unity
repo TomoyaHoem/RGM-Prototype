@@ -696,8 +696,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   population: []
-  bestParents: []
-  emptyMachines: []
+  bestInfParents: []
+  bestFParents: []
+  feasiblePop: []
+  infeasiblePop: []
 --- !u!114 &1894425069
 MonoBehaviour:
   m_ObjectHideFlags: 0

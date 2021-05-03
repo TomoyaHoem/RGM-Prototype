@@ -5,36 +5,87 @@ using System.Linq;
 
 public class MachineSelector : MonoBehaviour
 {
-
-    List<GameObject> parents;
-    List<GameObject> empty;
-
-    Task cur;
-
-    public IEnumerator SelectMachines(List<GameObject> population, List<GameObject> bestParents, List<GameObject> emptyMachines)
+    //returns list of parent pairs in descending order
+    public IEnumerator SelectMachines(List<GameObject> population, List<GameObject> bestParents, bool feasible)
     {
-        parents = bestParents;
-        empty = emptyMachines;
-
-        int numPairs = (population.Count / 3) * 2;
-        int evolutionMethod = SettingsReader.Instance.EASettings.EvolutionMethod;
-
-        if(evolutionMethod == 1)
+        if(population.Count < 2)
         {
-            //auto
-            cur = new Task(AutoSelection(population, numPairs));
-            while (cur.Running) yield return null;
-        } else if(evolutionMethod == 2)
+            Debug.Log("population is too small to select parents");
+            yield break;
+        }
+        
+        //thee forths of populationsize will be chosen as parents
+        int numParents = Mathf.RoundToInt(0.75f * population.Count);
+        if(numParents % 2 != 0)
         {
-            //manual
-            cur = new Task(ManualSelection(population, numPairs));
-            while (cur.Running) yield return null;
+            numParents++;
+        }
+
+        if (feasible)
+        {
+            //random selection, pass copy of population as it will be changed
+            RandomSelection(new List<GameObject>(population), bestParents, numParents);
         } else
         {
-            //interactive
+            //Tournament selection
+            TournamentSelection(new List<GameObject>(population), bestParents, numParents, 2);
+        }
+
+        yield return null;
+    }
+
+    private void RandomSelection(List<GameObject> population, List<GameObject> bestParents, int numParents)
+    {
+        //random index
+        int randomPick = 0;
+
+        //randomly pick parents and add to best parents
+        for (int i = 0; i < numParents; i++)
+        {
+            randomPick = Random.Range(0, population.Count);
+            bestParents.Add(population[randomPick]);
+            population.RemoveAt(randomPick);
         }
     }
 
+    //tournament selection without replacement
+    private void TournamentSelection(List<GameObject> population, List<GameObject> bestParents, int numParents, int TournamentSize)
+    {
+        int randomPick = 0;
+
+        int feasIndex = SettingsReader.Instance.EASettings.FitFunc.Count - 1;
+
+        GameObject winner = null;
+
+        List<GameObject> tournament;
+
+        for (int i = 0; i < numParents; i++)
+        {
+            //new tournament for each parent to choose
+            tournament = new List<GameObject>();
+            //choose random individuals from population for tournament with set tournamentsize
+            for (int j = 0; j < TournamentSize; j++)
+            {
+                randomPick = Random.Range(0, population.Count);
+                tournament.Add(population[randomPick]);
+            }
+            //find best in tournament based on feasibility
+            winner = tournament[0];
+            for (int j = 1; j < TournamentSize; j++)
+            {
+                if(winner.GetComponent<Machine>().FitnessVals[feasIndex] < tournament[j].GetComponent<Machine>().FitnessVals[feasIndex])
+                {
+                    winner = tournament[j];
+                }
+            }
+
+            //add winner to best parents and remove from copied population
+            bestParents.Add(winner);
+            population.Remove(winner);
+        }
+    }
+
+    /* NO EVOLUTION METHODS ONLY AUTO
     IEnumerator ManualSelection(List<GameObject> population, int numPairs)
     {
         //enable selection box and subscribe selection event
@@ -110,5 +161,23 @@ public class MachineSelector : MonoBehaviour
             parents.Add(machine);
         }
     }
+
+
+    //int evolutionMethod = SettingsReader.Instance.EASettings.EvolutionMethod;
+    if(evolutionMethod == 1)
+    {
+        //auto
+        cur = new Task(AutoSelection(population, numPairs));
+        while (cur.Running) yield return null;
+    } else if(evolutionMethod == 2)
+    {
+        //manual
+        cur = new Task(ManualSelection(population, numPairs));
+        while (cur.Running) yield return null;
+    } else
+    {
+        //interactive
+    }
+    */
 
 }

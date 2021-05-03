@@ -42,10 +42,14 @@ public class MachineTester : MonoBehaviour
         //loop test timer or testsequence complete
         TestSequence = new List<GameObject>();
         float timer = 0f;
-        while (timer < 1f)
+        while (timer < 0.3f)
         {
             //if TestSequence has same Length as original Sequence break
-            if (TestSequence.Count == gameObject.GetComponent<Machine>().SegmentPieces.Count) break;
+            if (TestSequence.Count == gameObject.GetComponent<Machine>().SegmentPieces.Count)
+            {
+                //Debug.Log(timer);
+                break;
+            }
             timer += Time.deltaTime / Time.timeScale;
             yield return null;
         }
@@ -79,6 +83,7 @@ public class MachineTester : MonoBehaviour
 
         SceneManager.MoveGameObjectToScene(gameObject, mainScene);
         gameObject.transform.parent = populationHolder.transform;
+        gameObject.SetActive(false);
     }
 
     private void OnSegmentPieceCollision(GameObject current)
