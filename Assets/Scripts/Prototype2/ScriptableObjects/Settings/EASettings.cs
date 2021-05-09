@@ -26,6 +26,8 @@ public class EASettings : ScriptableObject
     [SerializeField] [Range(0, 1)] private float frequency = 1;
     [SerializeField] [Range(0, 1)] private float linearity = 1;
     [SerializeField] [Range(0, 1)] private float compactness = 1;
+    [SerializeField] [Range(0, 1)] private float coverage = 1;
+
     [SerializeField] [Range(0, 1)] private float feasibility = 1;
 
     private Dictionary<string, float> fitFunc = new Dictionary<string, float>();
@@ -38,6 +40,7 @@ public class EASettings : ScriptableObject
                 if (frequency > 0) fitFunc.Add("freq", frequency);
                 if (linearity > 0) fitFunc.Add("lin", linearity);
                 if (compactness > 0) fitFunc.Add("comp", compactness);
+                if (coverage > 0) fitFunc.Add("cov", coverage);
                 if (feasibility > 0) fitFunc.Add("feas", feasibility);
             }
             return fitFunc;

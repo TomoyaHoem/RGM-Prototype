@@ -39,18 +39,20 @@ public class MachineRater : MonoBehaviour
     private void CalculateFitness(Machine machine)
     {
         List<float> fit = new List<float>();
-        float freq = 0, lin = 0, comp = 0, feas = 0;
+        float freq = 0, lin = 0, comp = 0, cov = 0, feas = 0;
 
         //add different weighted fitness metrics
         if (fitFuncs.ContainsKey("freq")) {freq = SegmentFrequency(machine) * fitFuncs["freq"]; fit.Add(freq); }
         if (fitFuncs.ContainsKey("lin")) { lin = SegmentLinearity(machine) * fitFuncs["lin"]; fit.Add(lin); }
         if (fitFuncs.ContainsKey("comp")) { comp = MachineCompactness(machine) * fitFuncs["comp"]; fit.Add(comp); }
+        if (fitFuncs.ContainsKey("cov")) { cov = MachineCoverage(machine) * fitFuncs["cov"]; fit.Add(cov); }
+
         if (fitFuncs.ContainsKey("feas")) { feas = MachineFeasibility(machine) * fitFuncs["feas"]; fit.Add(feas); }
 
         //Debug.Log(machine.gameObject.name + " Fitness -> " + "Freq: " + freq + " Lin: " + lin + " Comp: " + comp + " Feas: " + feas);
 
         machine.FitnessVals = fit;
-        machine.Fitness = freq + lin + comp + feas;
+        machine.Fitness = freq + lin + comp + cov + feas;
 
         machine.Canvas.transform.GetChild(0).GetComponent<BarChart>().UpdateBars(fit);
     }
@@ -151,6 +153,45 @@ public class MachineRater : MonoBehaviour
         res = Mathf.Exp(-res);
 
         return res;
+    }
+
+    private float MachineCoverage(Machine machine)
+    {
+        float result = 0f;
+
+        float machineCoverage = 0;
+        float restrictionCoverage = 0;
+
+        //calculate area covered by machine
+        //add up are of each segments bounding box
+        foreach (GameObject segment in machine.Segments)
+        {
+            machineCoverage += segment.GetComponent<SegmentLogic>().CalcCoverage();
+        }
+
+        //calculate restriction area size
+        restrictionCoverage = CalculateRestrictionCoverage(SettingsReader.Instance.MachineSettings.MachineArea, machine);
+
+        //compare results
+        result = machineCoverage / restrictionCoverage;
+
+        return result;
+    }
+
+    private float CalculateRestrictionCoverage(float machineArea, Machine machine)
+    {
+        int shape = SettingsReader.Instance.MachineSettings.AreaShape;
+
+        if(shape == 1)
+        {
+            return machineArea * machineArea;
+        } else if(shape == 2)
+        {
+            return Mathf.PI * Mathf.Pow((machineArea / 2), 2);
+        } else
+        {
+            return 0;
+        }
     }
 
     private float MachineFeasibility(Machine machine)

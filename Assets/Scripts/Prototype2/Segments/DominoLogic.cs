@@ -221,6 +221,16 @@ public class DominoLogic : SegmentLogic
         Debug.DrawLine(bottomOppositeCorner, topCorner, color, duration);
     }
 
+    public override float CalcCoverage()
+    {
+        CalcBoundingBox();
+
+        float a = Mathf.Abs(boundingBoxTopCorner.x - boundingBoxBottomCorner.x);
+        float b = Mathf.Abs(boundingBoxTopCorner.y - boundingBoxBottomCorner.y);
+
+        return a * b;
+    }
+
     /*
     DEPRECATED
     public override bool CheckEnoughRoom(Vector2 input, Vector2 output)

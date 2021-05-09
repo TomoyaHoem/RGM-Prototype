@@ -12,6 +12,14 @@ public class MachineSettings : ScriptableObject
     [SerializeField] private float machineArea = 30;
     public float MachineArea { get { return machineArea; } }
 
+    [Space]
+    [SerializeField]
+    [Range(1, 3)]
+    //1: square 2: circle 3: triangle
+    private int areaShape = 1;
+    public int AreaShape { get { return areaShape; } }
+
+    [Space]
     [SerializeField] private bool manualGeneration = false;
     public bool ManualGeneration { get { return manualGeneration; } }
 }

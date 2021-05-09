@@ -26,6 +26,9 @@ public abstract class SegmentLogic : MonoBehaviour
     public abstract bool CheckEnoughRoomMirrored(Vector2 input, Vector2 output, Vector2 offset, string s, bool mode);
     */
 
+    //method that returns boundingbox size for coverage calculatin
+    public abstract float CalcCoverage();
+
     //check if there is enough space for current segment
     //mode true: only check for string, false: check for any but, mirror, duration to draw box
     public abstract bool CheckSegmentOverlap(Vector2 offset, string s, bool mode, bool mirrored, float duration);

@@ -91,7 +91,7 @@ public class Machine : MonoBehaviour
             Canvas = Instantiate(Resources.Load("Prefabs/BarChart/BarChartCanvas"), gameObject.transform) as GameObject;
             float scale = machineArea / 100;
             Canvas.GetComponent<RectTransform>().transform.localScale = Canvas.GetComponent<RectTransform>().transform.localScale * scale;
-            Canvas.transform.parent = gameObject.transform;
+            Canvas.transform.SetParent(gameObject.transform, false);
         }
     }
 

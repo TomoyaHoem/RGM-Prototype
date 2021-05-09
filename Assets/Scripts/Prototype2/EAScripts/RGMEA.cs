@@ -11,7 +11,7 @@ public class RGMEA : MonoBehaviour
     //population and generation number
     GameObject populationHolder;
     [SerializeField]
-    List<GameObject> population, bestInfParents, bestFParents, feasiblePop, infeasiblePop;
+    List<GameObject> population, bestInfParents, bestFParents, feasiblePop, infeasiblePop, feasibleChildren, infeasibleChildren, newFeasiblePop;
     public int Generation { get; private set; }
 
     //script references
@@ -42,8 +42,6 @@ public class RGMEA : MonoBehaviour
         //EA-Setup -> Population, Scripts
         EASetup();
 
-        refPoints = ReferencePointCalculator.CalculateReferencePoints(20, SettingsReader.Instance.EASettings.FitFunc.Count);
-
         Debug.Log("Press Space to start evolution.");
 
         while (!Input.GetKeyDown(KeyCode.Space))
@@ -53,20 +51,32 @@ public class RGMEA : MonoBehaviour
 
         int populationSize = SettingsReader.Instance.EASettings.PopulationSize;
 
+        refPoints = ReferencePointCalculator.CalculateReferencePoints(populationSize, SettingsReader.Instance.EASettings.FitFunc.Count - 1);
+
+        //init UI
+        UIStatistics.Instance.InitUIData();
+
         //Loop
         for (int i = 0; i < SettingsReader.Instance.EASettings.Iterations; i++)
         {
+            UIStatistics.Instance.Iteration = i;
+
             //Step 1: Rate population
             cur = new Task(mR.RateMachines(population));
             while (cur.Running) yield return null;
 
-            Debug.Log("tested machines");
+            //Debug.Log("tested machines");
+
+            //update children statistics
+            UIStatistics.Instance.FeasChildCount = feasibleChildren.Count;
+            UIStatistics.Instance.InfeasChildCount = infeasibleChildren.Count;
 
             //Step 2: Split population by feasibility
             int feasIndex = SettingsReader.Instance.EASettings.FitFunc.Count - 1;
             //clear and refilter
             infeasiblePop.Clear(); feasiblePop.Clear();
 
+            //split
             foreach (GameObject indv in population)
             {
                 if (indv.GetComponent<Machine>().FitnessVals[feasIndex] < 1)
@@ -79,7 +89,7 @@ public class RGMEA : MonoBehaviour
                 }
             }
 
-            Debug.Log("split machines");
+            //Debug.Log("split machines");
 
             //Step 2.1: Environment seleciton
 
@@ -94,29 +104,76 @@ public class RGMEA : MonoBehaviour
                 {
                     GameObject del = infeasiblePop[infeasiblePop.Count - 1];
                     infeasiblePop.RemoveAt(infeasiblePop.Count - 1);
-                    population.Remove(del);
                     Destroy(del);
                 }
             }
 
             //NSGA on feasible population
-            if (feasiblePop.Count > 4)
+            if (feasiblePop.Count > populationSize / 2)
             {
                 fronts = FastNonDominatedSort.CalculateFronts(feasiblePop);
-                int feasCount = feasiblePop.Count > populationSize / 2 ? 15 : feasiblePop.Count;
-                feasiblePop = NSGA3.NSGAIII(fronts, new List<ReferencePoint>(refPoints), feasCount);
+                newFeasiblePop = NSGA3.NSGAIII(fronts, new List<ReferencePoint>(refPoints), populationSize / 2);
+                for (int j = feasiblePop.Count - 1; j > -1; j--)
+                {
+                    if (!newFeasiblePop.Contains(feasiblePop[j]))
+                    {
+                        GameObject del = feasiblePop[j];
+                        feasiblePop.RemoveAt(j);
+                        Destroy(del);
+                    }
+                }
             }
 
             //update population
             population = infeasiblePop.Concat(feasiblePop).ToList();
 
-            Debug.Log(infeasiblePop.Count + " , trimmed , " + feasiblePop.Count);
+            //calc UI stats
+            CalculateFitnessStatistics(feasIndex);
+
+            //count stay and transfer of children
+            int stay = 0;
+            int transfer = 0;
+            foreach (GameObject g in feasibleChildren)
+            {
+                if (feasiblePop.Contains(g))
+                {
+                    stay++;
+                }
+                if (infeasibleChildren.Contains(g))
+                {
+                    transfer++;
+                }
+            }
+            UIStatistics.Instance.FeasStay = stay;
+            UIStatistics.Instance.FeasTransfer = transfer;
+            stay = 0;
+            transfer = 0;
+            foreach (GameObject g in infeasibleChildren)
+            {
+                if (feasiblePop.Contains(g))
+                {
+                    transfer++;
+                }
+                if (infeasiblePop.Contains(g))
+                {
+                    stay++;
+                }
+            }
+            UIStatistics.Instance.InfeasStay = stay;
+            UIStatistics.Instance.InfeasTransfer = transfer;
+
+            //update population statistics
+            UIStatistics.Instance.PopulationSize = population.Count;
+            UIStatistics.Instance.FeasSize = feasiblePop.Count;
+            UIStatistics.Instance.InfeasSize = infeasiblePop.Count;
+
+            //Debug.Log(infeasiblePop.Count + " , trimmed , " + feasiblePop.Count);
 
             //rearrange population
             machineSp.RearrangeMachines(infeasiblePop, 2);
             machineSp.RearrangeMachines(feasiblePop, 1);
 
-            Debug.Log(infeasiblePop.Count + " , rearrange , " + feasiblePop.Count);
+            //Debug.Log(infeasiblePop.Count + " , rearrange , " + feasiblePop.Count);
 
             //Step 3a: Selection infeasible -> tournament
             cur = new Task(mS.SelectMachines(infeasiblePop, bestInfParents, false));
@@ -126,14 +183,14 @@ public class RGMEA : MonoBehaviour
             cur = new Task(mS.SelectMachines(feasiblePop, bestFParents, true));
             while (cur.Running) yield return null;
 
-            Debug.Log(bestInfParents.Count + " , parents , " + bestFParents.Count);
+            //Debug.Log(bestInfParents.Count + " , parents , " + bestFParents.Count);
 
             //Step 4: Crossover & Breeding
             //infeasible
-            cur = new Task(mB.BreedMachines(bestInfParents, false, population));
+            cur = new Task(mB.BreedMachines(bestInfParents, false, population, infeasibleChildren));
             while (cur.Running) yield return null;
             //feasible
-            cur = new Task(mB.BreedMachines(bestFParents, true, population));
+            cur = new Task(mB.BreedMachines(bestFParents, true, population, feasibleChildren));
             while (cur.Running) yield return null;
 
             //Step 5: Mutate all children
@@ -141,6 +198,10 @@ public class RGMEA : MonoBehaviour
             while (cur.Running) yield return null;
 
             Debug.Log("iteration: " + i);
+
+            //update UI
+            UIStatistics.Instance.UpdateUI();
+
             //while (!Input.GetKeyDown(KeyCode.Space))
             //{
             //    yield return null;
@@ -151,6 +212,36 @@ public class RGMEA : MonoBehaviour
         while (cur.Running) yield return null;
 
         Physics2D.autoSimulation = true;
+    }
+
+    private void CalculateFitnessStatistics(int feasIndex)
+    {
+        //calculate average feasibility
+        float feasSum = 0;
+        foreach (GameObject g in population)
+        {
+            feasSum += g.GetComponent<Machine>().FitnessVals[feasIndex];
+        }
+        feasSum /= population.Count;
+
+        //Debug.Log("average feas: " + feasSum);
+        UIStatistics.Instance.AverageFeasibility = feasSum;
+        //calculate average objectives
+        float[] objectiveSums = new float[SettingsReader.Instance.EASettings.FitFunc.Count - 1];
+
+        foreach (GameObject g in population)
+        {
+            for (int k = 0; k < objectiveSums.Length; k++)
+            {
+                objectiveSums[k] += g.GetComponent<Machine>().FitnessVals[k];
+            }
+        }
+        for (int l = 0; l < objectiveSums.Length; l++)
+        {
+            objectiveSums[l] /= population.Count;
+        }
+
+        UIStatistics.Instance.AverageObjectives = objectiveSums;
     }
 
     private void InitializePopulation()
@@ -195,6 +286,8 @@ public class RGMEA : MonoBehaviour
         bestFParents = new List<GameObject>();
         feasiblePop = new List<GameObject>();
         infeasiblePop = new List<GameObject>();
+        feasibleChildren = new List<GameObject>();
+        infeasibleChildren = new List<GameObject>();
         mR = gameObject.AddComponent<MachineRater>();
         mS = gameObject.AddComponent<MachineSelector>();
         mB = gameObject.AddComponent<MachineBreeder>();

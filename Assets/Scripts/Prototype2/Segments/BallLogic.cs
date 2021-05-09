@@ -111,6 +111,11 @@ public class BallLogic : SegmentLogic
         ramp.transform.localScale = new Vector3((startToEndDir.magnitude / ramp.GetComponent<SpriteRenderer>().size.x) - 0.0001f, 1f, 1f);
     }
 
+    public override float CalcCoverage()
+    {
+        return 0;
+    }
+
     /*
      * OLD
     public override bool CheckEnoughRoom(Vector2 input, Vector2 output)

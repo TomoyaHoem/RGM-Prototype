@@ -10,30 +10,32 @@ public class MachineBreeder : MonoBehaviour
     Vector3 midOffset = Vector3.zero;
     List<Vector2> mirroredIO;
 
-    public IEnumerator BreedMachines(List<GameObject> bestParents, bool feas, List<GameObject> population)
+    public IEnumerator BreedMachines(List<GameObject> bestParents, bool feas, List<GameObject> population, List<GameObject> children)
     {
+        children.Clear();
+
         if (bestParents.Count < 2)
         {
             Debug.Log("population is too small to breed parents");
             yield break;
         }
 
-        Debug.Log("possible crossovers: " + bestParents.Count/2);
         crossSuc = 0;
 
         for (int i = 0; i < bestParents.Count; i += 2)
         {
-            OnePointCrossover(bestParents[i], bestParents[i + 1], bestParents.Count, feas, population);
+            OnePointCrossover(bestParents[i], bestParents[i + 1], bestParents.Count, feas, population, children);
         }
 
-        bestParents.Clear();
+        int index = feas ? 1 : 0; 
+        UIStatistics.Instance.CrossoverChance[index] = (float)crossSuc / (bestParents.Count / 2);
 
-        Debug.Log("successfull crossovers: " + crossSuc);
+        bestParents.Clear();
 
         yield return null;
     }
 
-    private void OnePointCrossover(GameObject parent1, GameObject parent2, int popSize, bool feas, List<GameObject> population)
+    private void OnePointCrossover(GameObject parent1, GameObject parent2, int popSize, bool feas, List<GameObject> population, List<GameObject> children)
     {
         List<GameObject> p1 = parent1.GetComponent<Machine>().Segments;
         List<GameObject> p2 = parent2.GetComponent<Machine>().Segments;
@@ -73,6 +75,7 @@ public class MachineBreeder : MonoBehaviour
                 CombineMachinePartsIntoNew(midP1, midP2, parent1, parent2, newMachine, false);
                 crossSuc++;
                 population.Add(newMachine);
+                children.Add(newMachine);
             }
         } else
         {
@@ -92,6 +95,7 @@ public class MachineBreeder : MonoBehaviour
                 CombineMachinePartsIntoNew(midP1, midP2, parent1, parent2, newMachine, true);
                 crossSuc++;
                 population.Add(newMachine);
+                children.Add(newMachine);
             }
         }
         
@@ -142,14 +146,29 @@ public class MachineBreeder : MonoBehaviour
 
         //RGMTest.DrawRectangle(new Vector2(maxX, maxY), new Vector2(minX, minY), Color.magenta, 10);
 
-        //if area is smaller than restriction, find center offset and return true, else false
-        if ((maxX - minX) < areaSize && (maxY - minY) < areaSize)
+        int shape = SettingsReader.Instance.MachineSettings.AreaShape;
+        if(shape == 1)
         {
-            Vector2 machineMiddle = new Vector2(minX + (maxX - minX) / 2, minY + (maxY - minY) / 2);
-            //Debug.Log(minX + "," + minY + " : " + maxX + "," + maxY);
-            //Debug.Log("machmid: " + machineMiddle + " mid: " + middle);
-            midOffset = middle - machineMiddle;
-            return true;
+            //if area is smaller than restriction, find center offset and return true, else false
+            if ((maxX - minX) < areaSize && (maxY - minY) < areaSize)
+            {
+                Vector2 machineMiddle = new Vector2(minX + (maxX - minX) / 2, minY + (maxY - minY) / 2);
+                //Debug.Log(minX + "," + minY + " : " + maxX + "," + maxY);
+                //Debug.Log("machmid: " + machineMiddle + " mid: " + middle);
+                midOffset = middle - machineMiddle;
+                return true;
+            }
+        } else if(shape == 2)
+        {
+            //if area is smaller than restriction, find center offset and return true, else false
+            if ((maxX - minX) < areaSize && (maxY - minY) < areaSize)
+            {
+                Vector2 machineMiddle = new Vector2(minX + (maxX - minX) / 2, minY + (maxY - minY) / 2);
+                //Debug.Log(minX + "," + minY + " : " + maxX + "," + maxY);
+                //Debug.Log("machmid: " + machineMiddle + " mid: " + middle);
+                midOffset = middle - machineMiddle;
+                return true;
+            }
         }
         //Debug.Log("does not fit");
         return false;

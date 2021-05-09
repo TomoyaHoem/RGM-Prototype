@@ -157,6 +157,16 @@ public class BezierTrackLogic : SegmentLogic
         return true;
     }
 
+    public override float CalcCoverage()
+    {
+        CalcBoundingBox(BezierTrack.EvenPoints);
+
+        float a = Mathf.Abs(boundingBoxTopCorner.x - boundingBoxBottomCorner.x);
+        float b = Mathf.Abs(boundingBoxTopCorner.y - boundingBoxBottomCorner.y);
+
+        return a * b;
+    }
+
     /*
      * DEPRECATED
     public override bool CheckEnoughRoom(Vector2 input, Vector2 output)

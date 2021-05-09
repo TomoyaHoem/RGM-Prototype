@@ -160,4 +160,14 @@ public class HammerLogic : SegmentLogic
         Debug.DrawLine(bottomCorner, bottomOppositeCorner, color, duration);
         Debug.DrawLine(bottomOppositeCorner, topCorner, color, duration);
     }
+
+    public override float CalcCoverage()
+    {
+        CalcBoundingBox();
+
+        float a = Mathf.Abs(boundingBoxTopCorner.x - boundingBoxBottomCorner.x);
+        float b = Mathf.Abs(boundingBoxTopCorner.y - boundingBoxBottomCorner.y);
+
+        return a * b;
+    }
 }

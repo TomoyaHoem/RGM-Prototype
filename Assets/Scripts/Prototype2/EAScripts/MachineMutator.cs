@@ -12,6 +12,8 @@ public class MachineMutator : MonoBehaviour
 
     SegmentSelectionLogic sL;
 
+    int mutationSuccess, possibleMutations;
+
     private System.Random random = new System.Random();
 
     private void Awake()
@@ -21,13 +23,20 @@ public class MachineMutator : MonoBehaviour
 
     public IEnumerator MutateMachines(List<GameObject> population)
     {
+        mutationSuccess = 0;
+        possibleMutations = 0;
+
         foreach (GameObject machine in population)
         {
             if (machine.GetComponent<Machine>().Fitness == 0)
             {
+                possibleMutations++;
                 AssignMutation(machine);
             }
         }
+
+        UIStatistics.Instance.MutationChance = (float)mutationSuccess / possibleMutations;
+
         //AssignMutation(population[0]);
         yield return null;
     }
@@ -84,6 +93,7 @@ public class MachineMutator : MonoBehaviour
                 mutationDelegate(mSegs, index);
                 MoveMachine(mSegs.GetRange(index, mSegs.Count - index), offset);
                 SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), true);
+                mutationSuccess++;
                 //Debug.Log("mutation last successfull");
                 return;
             } else
@@ -98,6 +108,7 @@ public class MachineMutator : MonoBehaviour
                         mutationDelegate(mSegs, index);
                         MoveMachine(mSegs.GetRange(index, mSegs.Count - index), offset);
                         SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), true);
+                        mutationSuccess++;
                         //Debug.Log("mutation normal successfull");
                         return;
                     }
@@ -111,6 +122,7 @@ public class MachineMutator : MonoBehaviour
                         mutationDelegate(mSegs, index);
                         MoveMachineMirrored(mSegs.GetRange(index, mSegs.Count - index), offset);
                         SwitchGameObjectsState(mSegs.GetRange(index, mSegs.Count - index), true);
+                        mutationSuccess++;
                         //Debug.Log("mutation mirrored successfull");
                         return;
                     }

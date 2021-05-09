@@ -3,7 +3,7 @@ using UnityEngine;
 
 public static class Normalization
 {
-    static int NUM_OBJECTIVES = SettingsReader.Instance.EASettings.FitFunc.Count;
+    static int NUM_OBJECTIVES = SettingsReader.Instance.EASettings.FitFunc.Count-1;
 
     //find indeal point and simultaneously translate objectives
     public static List<float> ComputeIdealPoint(List<List<GameObject>> fronts)

@@ -95,7 +95,7 @@ public static class FastNonDominatedSort
 
         //check if any fitness value of b is less than of a -> if so a does not dominate b
         //if no fitness value of b is less than of a, check if one value of a is less than one of b -> a dominates b
-        for(int i = 0; i < fitnessA.Count; i++)
+        for(int i = 0; i < fitnessA.Count-1; i++)
         {
             if (fitnessB[i] < fitnessA[i])
             {

@@ -233,4 +233,14 @@ public class CarTrackLogic : SegmentLogic
         }
         return true;
     }
+
+    public override float CalcCoverage()
+    {
+        CalcBoundingBox(Car.EvenPoints);
+
+        float a = Mathf.Abs(boundingBoxTopCorner.x - boundingBoxBottomCorner.x);
+        float b = Mathf.Abs(boundingBoxTopCorner.y - boundingBoxBottomCorner.y);
+
+        return a * b;
+    }
 }
