@@ -13,20 +13,22 @@ public class MachineRater : MonoBehaviour
     {
         int evolutionMethod = SettingsReader.Instance.EASettings.EvolutionMethod;
 
-        if(evolutionMethod == 3)
+        if (evolutionMethod == 3)
         {
             //manual selection -> no rating needed
             yield break;
         }
 
-        if(fitFuncs.ContainsKey("feas"))
+        if (fitFuncs.ContainsKey("feas"))
         {
             Task testMachines = new Task(gameObject.GetComponent<MachineTestManager>().TestMachinePopulation(population));
             while (testMachines.Running) yield return null;
         }
 
-        foreach(GameObject machine in population)
+
+        foreach (GameObject machine in population)
         {
+            machine.GetComponent<Machine>().SegmentPieces.Clear();
             //only calculate fitness for new Machines
             if (machine.GetComponent<Machine>().Fitness == 0)
             {
@@ -42,7 +44,7 @@ public class MachineRater : MonoBehaviour
         float freq = 0, lin = 0, comp = 0, cov = 0, feas = 0;
 
         //add different weighted fitness metrics
-        if (fitFuncs.ContainsKey("freq")) {freq = SegmentFrequency(machine) * fitFuncs["freq"]; fit.Add(freq); }
+        if (fitFuncs.ContainsKey("freq")) { freq = SegmentFrequency(machine) * fitFuncs["freq"]; fit.Add(freq); }
         if (fitFuncs.ContainsKey("lin")) { lin = SegmentLinearity(machine) * fitFuncs["lin"]; fit.Add(lin); }
         if (fitFuncs.ContainsKey("comp")) { comp = MachineCompactness(machine) * fitFuncs["comp"]; fit.Add(comp); }
         if (fitFuncs.ContainsKey("cov")) { cov = MachineCoverage(machine) * fitFuncs["cov"]; fit.Add(cov); }
@@ -80,7 +82,7 @@ public class MachineRater : MonoBehaviour
 
         float shanDiv = dCount * RGMTest.LN(dCount) + bCount * RGMTest.LN(bCount) + mCount * RGMTest.LN(mCount);
 
-        result = Mathf.Abs(shanDiv /Mathf.Log(3));
+        result = Mathf.Abs(shanDiv / Mathf.Log(3));
 
         return result;
     }
@@ -146,7 +148,7 @@ public class MachineRater : MonoBehaviour
         //sigma -> #segments
         float sigma = num;
 
-        res = Mathf.Pow(Vector2.Distance(origin, position),2);
+        res = Mathf.Pow(Vector2.Distance(origin, position), 2);
 
         res /= 2 * Mathf.Pow(sigma, 2);
 
@@ -182,15 +184,17 @@ public class MachineRater : MonoBehaviour
     {
         int shape = SettingsReader.Instance.MachineSettings.AreaShape;
 
-        if(shape == 1)
+        if (shape == 1)
         {
             return machineArea * machineArea;
-        } else if(shape == 2)
+        }
+        else if (shape == 2)
         {
             return Mathf.PI * Mathf.Pow((machineArea / 2), 2);
-        } else
+        }
+        else
         {
-            return 0;
+            return (Mathf.Sqrt(3) / 4) * (Mathf.Pow(machine.TriangleEdgeLength, 2));
         }
     }
 
@@ -219,7 +223,7 @@ public class MachineRater : MonoBehaviour
         // Step 1 if either is empty distance is length of other
         if (n == 0) return m;
         if (m == 0) return n;
-        
+
         // Step 2 fill first column and row with 0,1,2,3,...,length
         for (int i = 0; i <= n; d[i, 0] = i++) { }
         for (int j = 0; j <= m; d[0, j] = j++) { }

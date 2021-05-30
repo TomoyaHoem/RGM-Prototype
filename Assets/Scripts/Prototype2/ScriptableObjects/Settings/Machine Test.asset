@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   numSegments: 10
   machineArea: 100
-  areaShape: 3
+  areaShape: 1
   manualGeneration: 0

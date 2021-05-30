@@ -20,6 +20,7 @@ public class RGMEA : MonoBehaviour
     MachineBreeder mB;
     MachineMutator mT;
     MachineSpawner machineSp;
+    MachineSettings settings;
 
     //NSGA references
     List<ReferencePoint> refPoints;
@@ -37,10 +38,15 @@ public class RGMEA : MonoBehaviour
         InitializePopulation();
 
         cur = new Task(WaitForMachineGeneration());
-        while (cur.Running) yield return null;
+        while (cur.Running)
+        {
+            yield return null;
+        }
 
         //EA-Setup -> Population, Scripts
         EASetup();
+
+        SegmentDistribution(population);
 
         Debug.Log("Press Space to start evolution.");
 
@@ -208,9 +214,6 @@ public class RGMEA : MonoBehaviour
             //}
         }
 
-        cur = new Task(mR.RateMachines(population));
-        while (cur.Running) yield return null;
-
         Physics2D.autoSimulation = true;
     }
 
@@ -294,5 +297,35 @@ public class RGMEA : MonoBehaviour
         mB.machineSp = machineSp;
         mT = gameObject.AddComponent<MachineMutator>();
         gameObject.AddComponent<MachineTestManager>();
+    }
+
+    private void SegmentDistribution(List<GameObject> population)
+    {
+        //domino, ramp, mill, hammer, track
+        int[] distribution = { 0, 0, 0, 0, 0 };
+
+        foreach (GameObject g in population)
+        {
+            foreach (GameObject s in g.GetComponent<Machine>().Segments)
+            {
+                int id = s.GetComponent<SegmentPart>().SegmentID;
+                if (id == 2 || id == 3)
+                {
+                    distribution[2]++;
+                }
+                else if (id > 3)
+                {
+                    distribution[id - 1]++;
+                }
+                else
+                {
+                    distribution[id]++;
+                }
+            }
+        }
+
+        int numSegments = distribution[0] + distribution[1] + distribution[2] + distribution[3] + distribution[4];
+
+        Debug.Log("Of " + numSegments + " segments -> Domino: " + distribution[0] + ", Ball: " + distribution[1] + ", Mill: " + distribution[2] + ", Hammer: " + distribution[3] + ", Car: " + distribution[4]);
     }
 }

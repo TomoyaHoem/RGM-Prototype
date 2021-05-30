@@ -22,4 +22,21 @@ public class MachineSettings : ScriptableObject
     [Space]
     [SerializeField] private bool manualGeneration = false;
     public bool ManualGeneration { get { return manualGeneration; } }
+
+    //machine generation tests
+    public int SuccessfullMachines { get; set; }
+    public float GenerationTime { get; set; }
+    public int StuckCount { get; set; }
+
+    //EA tests
+    public float TotalTestingTime { get; set; }
+    public float AverageCompleteTime { get; set; }
+    public int CompleteCount { get; set; }
+
+    public int SpeedUp { get; set; }
+    public List<float> Fps { get; set; }
+    public float Limit { get; set; }
+
+    public int ParallelMachines { get; set; }
+    public float MaxTime { get; set; }
 }

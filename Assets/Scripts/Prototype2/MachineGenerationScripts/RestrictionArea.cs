@@ -5,10 +5,10 @@ using UnityEngine;
 //generates edgeCollider2D around machines as bounding box
 public class RestrictionArea : MonoBehaviour
 {
-    public void GenerateRestrictionArea(float machineArea)
+    public void GenerateRestrictionArea(float machineArea, Machine machine)
     {
         //point distance from origin
-        float pDFO = machineArea / 2;
+        float pDFO = (machineArea + 2) / 2;
         int shape = SettingsReader.Instance.MachineSettings.AreaShape;
 
         Vector2[] points;
@@ -85,6 +85,9 @@ public class RestrictionArea : MonoBehaviour
 
             //add edge collider and set points
             gameObject.AddComponent<EdgeCollider2D>().points = points;
+
+            //store edge length for area calculation
+            machine.TriangleEdgeLength = Vector2.Distance(points[0], points[1]);
         }
 
         //set edge collider width

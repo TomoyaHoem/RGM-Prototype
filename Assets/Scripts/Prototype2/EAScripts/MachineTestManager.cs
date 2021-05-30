@@ -25,10 +25,10 @@ public class MachineTestManager : MonoBehaviour
 
     private void Awake()
     {
+        System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+
         mainScene = SceneManager.GetActiveScene();
-
-        maxParallelTasks = 40 / SettingsReader.Instance.MachineSettings.NumSegments > 0 ? 40 / SettingsReader.Instance.MachineSettings.NumSegments : 1;
-
+        
         CreateSceneParameters sceneParam = new CreateSceneParameters(LocalPhysicsMode.Physics2D);
         simulationScene = SceneManager.CreateScene("Machine Simulation", sceneParam);
         simulationScenePhysics = simulationScene.GetPhysicsScene2D();
@@ -36,6 +36,8 @@ public class MachineTestManager : MonoBehaviour
 
     public IEnumerator TestMachinePopulation(List<GameObject> population)
     {
+        maxParallelTasks = SettingsReader.Instance.MachineSettings.ParallelMachines;//40 / SettingsReader.Instance.MachineSettings.NumSegments > 0 ? 40 / SettingsReader.Instance.MachineSettings.NumSegments : 1;
+
         List<GameObject> testMachines = new List<GameObject>();
         GameObject populationHolder = population[0].transform.parent.gameObject;
 
@@ -43,7 +45,7 @@ public class MachineTestManager : MonoBehaviour
         foreach(GameObject machine in population)
         {
             machine.SetActive(false);
-            if (machine.GetComponent<Machine>().Fitness == 0)
+            if (machine.GetComponent<Machine>().Fitness == 0 || true)
             {
                 //add to list
                 testMachines.Add(machine);
@@ -78,7 +80,7 @@ public class MachineTestManager : MonoBehaviour
                 SceneManager.MoveGameObjectToScene(machine, simulationScene);
 
                 machine.GetComponent<Machine>().InitSegPieces();
-                MachineTester cur = (machine.GetComponent<MachineTester>() == null) ? machine.AddComponent<MachineTester>() : machine.GetComponent<MachineTester>();
+                MachineTester cur = machine.GetComponent<MachineTester>() ?? machine.AddComponent<MachineTester>();
 
                 t = new Task(cur.TestMachine(populationHolder));
                 t.Finished += OnMachineTestFinished;
@@ -112,7 +114,7 @@ public class MachineTestManager : MonoBehaviour
     {
         if (isActive)
         {
-            Time.timeScale = 100;
+            Time.timeScale = SettingsReader.Instance.MachineSettings.SpeedUp;
             simulationScenePhysics.Simulate(Time.fixedDeltaTime);
         } else
         {

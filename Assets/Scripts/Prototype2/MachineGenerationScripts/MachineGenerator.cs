@@ -27,8 +27,12 @@ public class MachineGenerator : MonoBehaviour
     //Event triggers when MachineGeneration finishes or Stops
     public event Action machineCompleteEvent;
 
+    private float time;
+
     public void GenerateNewMachine(int numSegments)
     {
+        time = Time.realtimeSinceStartup;
+
         float machineArea = SettingsReader.Instance.MachineSettings.MachineArea;
 
         MachineSetup(machineArea);
@@ -64,6 +68,8 @@ public class MachineGenerator : MonoBehaviour
 
     public void StopMachineGeneration()
     {
+        SettingsReader.Instance.MachineSettings.GenerationTime += Time.realtimeSinceStartup - time;
+        SettingsReader.Instance.MachineSettings.StuckCount += stuckCount;
         if (machineGeneration != null)
         {
             machineGeneration.Stop();
@@ -78,7 +84,7 @@ public class MachineGenerator : MonoBehaviour
         //set machine GO as parent and origin position
         area.transform.position = transform.position;
         area.transform.parent = transform;
-        area.AddComponent<RestrictionArea>().GenerateRestrictionArea(machineArea);
+        area.AddComponent<RestrictionArea>().GenerateRestrictionArea(machineArea, machine);
     }
 
     private void GenAutoStart(Vector2 startDir)
@@ -112,6 +118,8 @@ public class MachineGenerator : MonoBehaviour
                 }
             }
         }
+
+        SettingsReader.Instance.MachineSettings.SuccessfullMachines++;
         StopMachineGeneration();
     }
 
@@ -174,7 +182,7 @@ public class MachineGenerator : MonoBehaviour
             if (machine.Segments.Count == 0)
             {
                 //first segment can not be generated -> terminate
-                Debug.Log("NO ROOM FOR FIRST SEGMENT, TERMINATING");
+                //Debug.Log("NO ROOM FOR FIRST SEGMENT, TERMINATING");
                 StopMachineGeneration();
             }
             else

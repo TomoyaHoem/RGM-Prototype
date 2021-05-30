@@ -161,7 +161,8 @@ public class MachineBreeder : MonoBehaviour
         } else if(shape == 2)
         {
             //if area is smaller than restriction, find center offset and return true, else false
-            if ((maxX - minX) < areaSize && (maxY - minY) < areaSize)
+            //for cirlce check if distance between min and max point is smaller than cirlce diameter
+            if (Vector2.Distance(new Vector2(minX, minY), new Vector2(maxX, maxY)) < areaSize * 2)
             {
                 Vector2 machineMiddle = new Vector2(minX + (maxX - minX) / 2, minY + (maxY - minY) / 2);
                 //Debug.Log(minX + "," + minY + " : " + maxX + "," + maxY);
@@ -169,6 +170,9 @@ public class MachineBreeder : MonoBehaviour
                 midOffset = middle - machineMiddle;
                 return true;
             }
+        } else
+        {
+
         }
         //Debug.Log("does not fit");
         return false;

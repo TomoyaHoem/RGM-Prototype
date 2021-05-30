@@ -23,6 +23,8 @@ public class Machine : MonoBehaviour
 
     public bool IsSelected { get; set; }
 
+    public float TriangleEdgeLength { get; set; }
+
     //Event triggers when Machine is selected
     public event Action<GameObject> MachineSelectedEvent;
 

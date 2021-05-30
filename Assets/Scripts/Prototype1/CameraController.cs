@@ -16,10 +16,12 @@ public class CameraController : MonoBehaviour
     private bool isSelected = true;
     private Color defaultColor;
 
+    public Camera mainCamera;
+
     private void Awake()
     {
         //panLimit = new Vector2(transform.position.x + 100f, transform.position.y + 100f);
-        defaultColor = GetComponent<Camera>().backgroundColor;
+        defaultColor = mainCamera.backgroundColor;
     }
 
     // Update is called once per frame
@@ -65,16 +67,16 @@ public class CameraController : MonoBehaviour
             //middlemouse drag
             if (Input.GetMouseButton(2))
             {
-                float zoom = GetComponent<Camera>().orthographicSize * dragSpeed;
+                float zoom = mainCamera.orthographicSize * dragSpeed;
                 pos.x -= Input.GetAxis("Mouse X") * zoom * Time.deltaTime;
                 pos.y -= Input.GetAxis("Mouse Y") * zoom * Time.deltaTime;
             }
 
             //scroll zoom
             float scroll = Input.GetAxis("Mouse ScrollWheel");
-            GetComponent<Camera>().orthographicSize -= scroll * scrollSpeed * Time.deltaTime;
+            mainCamera.orthographicSize -= scroll * scrollSpeed * Time.deltaTime;
 
-            GetComponent<Camera>().orthographicSize = Mathf.Clamp(GetComponent<Camera>().orthographicSize, 1, sizeLimit);
+            mainCamera.orthographicSize = Mathf.Clamp(mainCamera.orthographicSize, 1, sizeLimit);
             pos.x = Mathf.Clamp(pos.x, -panLimit.x, panLimit.x);
             pos.y = Mathf.Clamp(pos.y, -panLimit.y, panLimit.y);
 

@@ -9,17 +9,20 @@ public class MachineTester : MonoBehaviour
 
     Scene mainScene;
 
+    MachineSettings settings;
+
     private void Awake()
     {
         mainScene = SceneManager.GetActiveScene();
     }
 
+    private void Start()
+    {
+        settings = SettingsReader.Instance.MachineSettings;
+    }
+
     public IEnumerator TestMachine(GameObject populationHolder)
     {
-        //start auto start
-        GameObject autoStart = gameObject.GetComponent<Machine>().AutoStart;
-        Task t = new Task(autoStart.GetComponent<AutoStart>().MovePiston(autoStart.transform.GetChild(0).transform));
-
         //subscribe all
         foreach(GameObject segment in gameObject.GetComponent<Machine>().Segments)
         {
@@ -39,18 +42,23 @@ public class MachineTester : MonoBehaviour
             }
         }
 
+        //start auto start
+        GameObject autoStart = gameObject.GetComponent<Machine>().AutoStart;
+        Task t = new Task(autoStart.GetComponent<AutoStart>().MovePiston(autoStart.transform.GetChild(0).transform));
+
         //loop test timer or testsequence complete
         TestSequence = new List<GameObject>();
+        TestSequence.Clear();
         float timer = 0f;
-        while (timer < 0.3f)
+        while (timer < SettingsReader.Instance.MachineSettings.Limit)
         {
             //if TestSequence has same Length as original Sequence break
             if (TestSequence.Count == gameObject.GetComponent<Machine>().SegmentPieces.Count)
             {
-                //Debug.Log(timer);
+                if (settings.MaxTime < timer) settings.MaxTime = timer;
                 break;
             }
-            timer += Time.deltaTime / Time.timeScale;
+            timer += Time.unscaledDeltaTime;
             yield return null;
         }
 

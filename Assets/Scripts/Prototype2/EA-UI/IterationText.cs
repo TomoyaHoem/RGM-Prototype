@@ -16,7 +16,7 @@ public class IterationText : UIPart
     public override void UpdateStatistics()
     {
         int iteration = UIStatistics.Instance.Iteration;
-        it.SetText("Iteration: " + iteration);
+        it.SetText("Iteration i: " + iteration);
     }
 
 }
