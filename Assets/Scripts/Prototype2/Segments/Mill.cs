@@ -22,7 +22,7 @@ public class Mill : SegmentPart
     public override void ResetSegment()
     {
         //reset color
-        MillPiece.GetComponent<SpriteRenderer>().color = Color.gray;
+        MillPiece.GetComponent<SpriteRenderer>().color = new Color(99f / 255, 99f / 255, 99f / 255);
         //reset velocity
         MillPiece.SetActive(false);
         MillPiece.SetActive(true);

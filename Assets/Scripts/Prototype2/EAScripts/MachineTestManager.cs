@@ -17,6 +17,8 @@ public class MachineTestManager : MonoBehaviour
     private int numTasks;
     //num of concurrently running tasks : machine tests
     private int curTasks;
+    //num of concurrently segments being tested
+    public int ConcurrentSegments { get; set; }
     //num of finished tasks, #machines tested
     private int finishedTasks;
 
@@ -45,11 +47,12 @@ public class MachineTestManager : MonoBehaviour
         foreach(GameObject machine in population)
         {
             machine.SetActive(false);
-            if (machine.GetComponent<Machine>().Fitness == 0 || true)
+            if (machine.GetComponent<Machine>().Fitness == 0)
             {
                 //add to list
                 testMachines.Add(machine);
             }
+            yield return null;
         }
 
         isActive = true;
@@ -63,10 +66,12 @@ public class MachineTestManager : MonoBehaviour
         curTasks = 0;
         //taskID to identify machine to test
         int taskID = 0;
+        //count segments to limit 80 segments parallel
+        ConcurrentSegments = 0;
 
         while(finishedTasks < numTasks)
         {
-            if (curTasks >= maxParallelTasks || taskID >= numTasks)
+            if (curTasks >= maxParallelTasks || taskID >= numTasks || ConcurrentSegments > 80)
             {
                 yield return null;
             } else
@@ -80,12 +85,21 @@ public class MachineTestManager : MonoBehaviour
                 SceneManager.MoveGameObjectToScene(machine, simulationScene);
 
                 machine.GetComponent<Machine>().InitSegPieces();
-                MachineTester cur = machine.GetComponent<MachineTester>() ?? machine.AddComponent<MachineTester>();
+                MachineTester cur;
+                if(machine.GetComponent<MachineTester>() != null)
+                {
+                    cur = machine.GetComponent<MachineTester>();
+                } else
+                {
+                    cur = machine.AddComponent<MachineTester>();
+                    cur.Manager = this;
+                }
 
                 t = new Task(cur.TestMachine(populationHolder));
                 t.Finished += OnMachineTestFinished;
                 taskList.Add(t);
 
+                ConcurrentSegments += machine.GetComponent<Machine>().Segments.Count;
                 curTasks++;
                 taskID++;
             }
@@ -101,6 +115,7 @@ public class MachineTestManager : MonoBehaviour
         foreach (GameObject machine in population)
         {
             machine.SetActive(true);
+            yield return null;
         }
     }
 

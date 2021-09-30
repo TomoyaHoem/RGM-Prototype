@@ -15,7 +15,6 @@ public class RestrictionArea : MonoBehaviour
 
         if (shape == 1)
         {
-
             //calculate 5 points (square) based on area
             points = new Vector2[5];
             for (int i = 0; i < 5; i++)

@@ -73,11 +73,21 @@ public static class FastNonDominatedSort
             //if unchecked fronts left
             if(p == currentFront.Count-1 && fronts.Count > frontIndex)
             {
-                //go to next front & increse counter
+                //go to next front & increase counter
                 currentFront = fronts[frontIndex];
                 frontIndex++;
                 //reset p
                 p = -1;
+            }
+        }
+
+        //save nondomination rank for tournament selection
+
+        for (int i = 0; i < fronts.Count; i++)
+        {
+            foreach (GameObject machine in fronts[i])
+            {
+                machine.GetComponent<Machine>().NonDominationRank = i + 1;
             }
         }
         

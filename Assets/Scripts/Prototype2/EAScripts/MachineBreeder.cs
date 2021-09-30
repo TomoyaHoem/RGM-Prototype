@@ -6,6 +6,8 @@ public class MachineBreeder : MonoBehaviour
 {
     public MachineSpawner machineSp { get; set; }
 
+    Task cur;
+
     int crossSuc;
     Vector3 midOffset = Vector3.zero;
     List<Vector2> mirroredIO;
@@ -21,14 +23,21 @@ public class MachineBreeder : MonoBehaviour
         }
 
         crossSuc = 0;
+        float random = 0;
 
         for (int i = 0; i < bestParents.Count; i += 2)
         {
-            OnePointCrossover(bestParents[i], bestParents[i + 1], bestParents.Count, feas, population, children);
+            random = Random.Range(0f, 1f);
+            if (random < SettingsReader.Instance.EASettings.CrossoverRate)
+            {
+                OnePointCrossover(bestParents[i], bestParents[i + 1], bestParents.Count, feas, population, children);
+            }
         }
 
-        int index = feas ? 1 : 0; 
+        int index = feas ? 1 : 0;
         UIStatistics.Instance.CrossoverChance[index] = (float)crossSuc / (bestParents.Count / 2);
+        SettingsReader.Instance.MachineSettings.EAStatistics[5 - index].Add(bestParents.Count / 2);
+        SettingsReader.Instance.MachineSettings.EAStatistics[34 - index].Add(crossSuc);
 
         bestParents.Clear();
 
@@ -44,6 +53,9 @@ public class MachineBreeder : MonoBehaviour
         int midP1 = (p1.Count / 2) - 1;
         int midP2 = p2.Count / 2;
 
+        //Debug.Log("Trying crossover with: " + parent1.name + " and: " + parent2.name);
+        //Debug.Log("Parent1 at: " + midP1 + " , Parent2 at: " + midP2);
+
         //disable latter half of fisrt machine
         for (int i = midP1 + 1; i < p1.Count; i++)
         {
@@ -55,10 +67,7 @@ public class MachineBreeder : MonoBehaviour
         List<GameObject> combined = p1.GetRange(0, midP1 + 1);
         combined.AddRange(p2.GetRange(midP2, p2.Count - midP2));
 
-        //Debug.Log("Trying crossover with: " + parent1.name + " and: " + parent2.name);
-        //Debug.Log("Parent1 at: " + midP1 + " , Parent2 at: " + midP2);
-
-        if(p1[midP1].GetComponent<SegmentPart>().OutputDirection.x == p2[midP2].GetComponent<SegmentPart>().InputDirection.x)
+        if (p1[midP1].GetComponent<SegmentPart>().OutputDirection.x == p2[midP2].GetComponent<SegmentPart>().InputDirection.x)
         {
             //Debug.Log("Crossover point has matching segment directions");
             if (CheckCollision(p2.GetRange(midP2, p2.Count - midP2), offset)
@@ -67,17 +76,19 @@ public class MachineBreeder : MonoBehaviour
                 GameObject newMachine;
                 if (feas)
                 {
-                   newMachine = machineSp.SpawnNewEmptyChildMachine(popSize, crossSuc, 4, false);
-                } else
+                    newMachine = machineSp.SpawnNewEmptyChildMachine(popSize, crossSuc, 4, false);
+                }
+                else
                 {
-                   newMachine = machineSp.SpawnNewEmptyChildMachine(popSize, crossSuc, 3, false);
+                    newMachine = machineSp.SpawnNewEmptyChildMachine(popSize, crossSuc, 3, false);
                 }
                 CombineMachinePartsIntoNew(midP1, midP2, parent1, parent2, newMachine, false);
                 crossSuc++;
                 population.Add(newMachine);
                 children.Add(newMachine);
             }
-        } else
+        }
+        else
         {
             //Debug.Log("Crossover point does not have matching segment directions");
             if (CheckCollisionMirrored(p2.GetRange(midP2, p2.Count - midP2), offset)
@@ -98,7 +109,7 @@ public class MachineBreeder : MonoBehaviour
                 children.Add(newMachine);
             }
         }
-        
+
         for (int i = midP1; i < p1.Count; i++)
         {
             p1[i].SetActive(true);
@@ -121,8 +132,9 @@ public class MachineBreeder : MonoBehaviour
                 {
                     int index = (i - mid - 1) * 2;
                     input = mirroredIO[index];
-                    output = mirroredIO[index+1];
-                } else
+                    output = mirroredIO[index + 1];
+                }
+                else
                 {
                     input += offset;
                     output += offset;
@@ -144,10 +156,10 @@ public class MachineBreeder : MonoBehaviour
         minX -= 4f; minY -= 3f; maxX += 4f; maxY += 3f;
         float areaSize = SettingsReader.Instance.MachineSettings.MachineArea;
 
-        //RGMTest.DrawRectangle(new Vector2(maxX, maxY), new Vector2(minX, minY), Color.magenta, 10);
-
+        //RGMTest.DrawRectangle(new Vector2(maxX, maxY), new Vector2(minX, minY), Color.magenta, 1000);
+        //Debug.Break();
         int shape = SettingsReader.Instance.MachineSettings.AreaShape;
-        if(shape == 1)
+        if (shape == 1)
         {
             //if area is smaller than restriction, find center offset and return true, else false
             if ((maxX - minX) < areaSize && (maxY - minY) < areaSize)
@@ -158,7 +170,8 @@ public class MachineBreeder : MonoBehaviour
                 midOffset = middle - machineMiddle;
                 return true;
             }
-        } else if(shape == 2)
+        }
+        else if (shape == 2)
         {
             //if area is smaller than restriction, find center offset and return true, else false
             //for cirlce check if distance between min and max point is smaller than cirlce diameter
@@ -170,9 +183,30 @@ public class MachineBreeder : MonoBehaviour
                 midOffset = middle - machineMiddle;
                 return true;
             }
-        } else
+        }
+        else
         {
+            //check if area is smaller than biggest rectangle that fits in side equilateral triangle
+            //https://www.quora.com/What-is-the-maximum-area-of-rectangle-that-can-be-inscribed-in-an-equilateral-triangle
+            //https://math.stackexchange.com/questions/2493858/largest-rectangle-that-can-fit-isnide-of-equilateral-triangle
 
+            //get edge length of equilateral triangle and substract buffer
+            float edgeLength = SettingsReader.Instance.MachineSettings.MachineArea - 20;
+
+            //calculate maximum area of rectangle that fits inside equilateral triangle
+            float maxArea = (Mathf.Sqrt(3) * Mathf.Pow(edgeLength, 2)) / 8;
+
+            //calculate area of machine
+            float machineArea = Mathf.Abs(maxX - minX) * Mathf.Abs(maxY - minY);
+
+            //check if fits
+            //if area is smaller than restriction, find center offset and return true, else false
+            if (machineArea < maxArea)
+            {
+                Vector2 machineMiddle = new Vector2(minX + (maxX - minX) / 2, minY + (maxY - minY) / 2);
+                midOffset = middle - machineMiddle;
+                return true;
+            }
         }
         //Debug.Log("does not fit");
         return false;
@@ -183,12 +217,13 @@ public class MachineBreeder : MonoBehaviour
         foreach (GameObject seg in machine)
         {
             //check for any collision but restriction area
-            if (!seg.GetComponent<SegmentLogic>().CheckSegmentOverlap(offset, "restriction area", false, false, 0))
+            if (!seg.GetComponent<SegmentLogic>().CheckSegmentOverlap(offset, "restriction area", false, false, 1000))
             {
                 //Debug.Log(seg.transform.parent.name + " collision: " + seg.name);
                 return false;
             }
         }
+
         return true;
     }
 
@@ -214,7 +249,7 @@ public class MachineBreeder : MonoBehaviour
             mirroredIO.Add(prevOutput);
 
             //check for any collision
-            if (!machine[i].GetComponent<SegmentLogic>().CheckSegmentOverlap(newOffset, "restriction area", false, true, 0))
+            if (!machine[i].GetComponent<SegmentLogic>().CheckSegmentOverlap(newOffset, "restriction area", false, true, 1000))
             {
                 //Debug.Log(machine[i].transform.parent.name + " collision: " + machine[i].name);
                 return false;
@@ -261,14 +296,14 @@ public class MachineBreeder : MonoBehaviour
         //copy first parents segments up until index, then second parents segments
         for (int i = 0; i <= midP1; i++)
         {
-            CopySegment(parentMachine1[i].gameObject, offset1, newMachine, false); 
+            CopySegment(parentMachine1[i].gameObject, offset1, newMachine, false);
         }
 
         for (int i = midP2; i < parentMachine2.Count; i++)
         {
-            if(i > midP2 && mirror)
+            if (i > midP2 && mirror)
             {
-                offset2 += (Vector3)((parentMachine2[i - 1].GetComponent<SegmentPart>().Output - parentMachine2[i - 1].GetComponent<SegmentPart>().Input) * new Vector2(-1,1));
+                offset2 += (Vector3)((parentMachine2[i - 1].GetComponent<SegmentPart>().Output - parentMachine2[i - 1].GetComponent<SegmentPart>().Input) * new Vector2(-1, 1));
                 offset2 = ((Vector3)parentMachine2[i - 1].GetComponent<SegmentPart>().Input + offset2) - (Vector3)parentMachine2[i].GetComponent<SegmentPart>().Input;
             }
 
@@ -301,3 +336,31 @@ public class MachineBreeder : MonoBehaviour
         empty.GetComponent<Machine>().Segments.Add(copy);
     }
 }
+
+
+/*
+Debug.Log("check collision");
+if(CheckCollision(p2.GetRange(midP2, p2.Count - midP2), offset)) {
+    while (!Input.GetKeyDown(KeyCode.X))
+    {
+        yield return null;
+    }
+} else
+{
+    Debug.Log("fail");
+    yield break;
+}
+Debug.Log("check area");
+if (CheckAreaFit(combined, offset, midP1, parent1.transform.position, false))
+{
+    while (!Input.GetKeyDown(KeyCode.Y))
+    {
+        yield return null;
+    }
+}
+else
+{
+    Debug.Log("fail");
+    yield break;
+}
+*/

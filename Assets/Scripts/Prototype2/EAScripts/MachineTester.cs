@@ -11,6 +11,8 @@ public class MachineTester : MonoBehaviour
 
     MachineSettings settings;
 
+    public MachineTestManager Manager;
+
     private void Awake()
     {
         mainScene = SceneManager.GetActiveScene();
@@ -50,19 +52,28 @@ public class MachineTester : MonoBehaviour
         TestSequence = new List<GameObject>();
         TestSequence.Clear();
         float timer = 0f;
-        while (timer < SettingsReader.Instance.MachineSettings.Limit)
+        float limit = SettingsReader.Instance.MachineSettings.Limit;
+        if(gameObject.GetComponent<Machine>().Segments.Count != SettingsReader.Instance.MachineSettings.NumSegments)
+        {
+            int diff = SettingsReader.Instance.MachineSettings.NumSegments - gameObject.GetComponent<Machine>().Segments.Count;
+            limit += 0.1f * diff / 10;
+        }
+        while (timer < limit)
         {
             //if TestSequence has same Length as original Sequence break
             if (TestSequence.Count == gameObject.GetComponent<Machine>().SegmentPieces.Count)
             {
-                if (settings.MaxTime < timer) settings.MaxTime = timer;
+                //if (settings.MaxTime < timer) settings.MaxTime = timer;
                 break;
             }
             timer += Time.unscaledDeltaTime;
             yield return null;
         }
 
-        while (t.Running) yield return null;
+        while (t.Running)
+        {
+            yield return null;
+        }
 
         //reset
         autoStart.GetComponent<AutoStart>().ResetAutoStart();
@@ -92,6 +103,7 @@ public class MachineTester : MonoBehaviour
         SceneManager.MoveGameObjectToScene(gameObject, mainScene);
         gameObject.transform.parent = populationHolder.transform;
         gameObject.SetActive(false);
+        Manager.ConcurrentSegments -= gameObject.GetComponent<Machine>().Segments.Count;
     }
 
     private void OnSegmentPieceCollision(GameObject current)

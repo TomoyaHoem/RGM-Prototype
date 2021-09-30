@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//switches background sprite depending on camera zoom
 public class BackGroundManager : MonoBehaviour
 {
 
@@ -51,6 +52,8 @@ public class BackGroundManager : MonoBehaviour
 
         sR = backGround.GetComponent<SpriteRenderer>();
         sR.drawMode = SpriteDrawMode.Tiled;
+
+        sR.sortingOrder = -5;
 
         SwitchTo(gridSprite1X, 1);
     }

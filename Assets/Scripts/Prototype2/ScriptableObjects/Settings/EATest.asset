@@ -12,12 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0224fcdb3f9c1e54e9a51f3a9db0fd11, type: 3}
   m_Name: EATest
   m_EditorClassIdentifier: 
-  populationSize: 100
-  mutationRate: 1
-  iterations: 0
-  evolutionMethod: 1
+  populationSize: 50
+  mutationRate: 0.3
+  parentSize: 0.9
+  crossoverRate: 1
+  iterations: 20
+  nsga: 3
   frequency: 1
   linearity: 1
   compactness: 1
   coverage: 1
   feasibility: 1
+  evolutionMethod: 1

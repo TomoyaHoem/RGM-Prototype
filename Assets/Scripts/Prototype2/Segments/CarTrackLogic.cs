@@ -31,7 +31,7 @@ public class CarTrackLogic : SegmentLogic
         //Debug.Log(BezierTrack.Input);
 
         float ranH = Random.Range(-4, 5);
-        int ranL = Random.Range(16, 32) * (int)prevDir.x;
+        int ranL = Random.Range(16, 33) * (int)prevDir.x;
 
         Vector2 output = new Vector2(ranL, ranH);
 
@@ -142,7 +142,7 @@ public class CarTrackLogic : SegmentLogic
 
         if (Random.Range(0, 4) > 0)
         {
-            //Marble
+            //Car
             Vector2 carSpawn = new Vector2(Car.EvenPoints[0].x + 1.25f * Car.InputDirection.x, Car.EvenPoints[0].y + meshWidth + 0.1f);
             Car.CarPiece = Instantiate(Resources.Load("Prefabs/NewCar"), carSpawn, Quaternion.identity, gameObject.transform) as GameObject;
             
@@ -187,7 +187,6 @@ public class CarTrackLogic : SegmentLogic
     {
         if (Car.EvenPoints == null || Car.EvenPoints.Length == 0) return;
         CalcBoundingBox(Car.EvenPoints);
-        //Debug.Log(boundingBoxBottomCorner + " , " + boundingBoxTopCorner);
         DrawRectangle(boundingBoxTopCorner, boundingBoxBottomCorner, Color.red, 0);
     }
 

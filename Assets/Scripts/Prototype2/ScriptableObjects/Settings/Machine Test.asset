@@ -16,3 +16,6 @@ MonoBehaviour:
   machineArea: 100
   areaShape: 1
   manualGeneration: 0
+  limit: 1.2
+  speedUp: 30
+  parallelMachines: 8

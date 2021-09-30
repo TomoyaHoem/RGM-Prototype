@@ -146,7 +146,8 @@ public class MachineGenerator : MonoBehaviour
         {
             //sample random segment from remaining list
             int sampleR = UnityEngine.Random.Range(0, remaining.Count);
-            int segID = remaining[sampleR]; remaining.Remove(segID); //segID = 1;
+            int segID = remaining[sampleR];
+            remaining.Remove(segID);
             //assign segment & logic
             sL.AssignSegment(segHol, segID);
             //assign in- / output (first seg or intermitten)

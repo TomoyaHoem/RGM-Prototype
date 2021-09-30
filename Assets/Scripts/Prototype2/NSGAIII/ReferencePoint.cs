@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class ReferencePoint
 {
-
     public List<float> Position { get; set; }
     public int MemberCount { get; set; }
     public List<Tuple<GameObject, float>> LastFrontMembers;

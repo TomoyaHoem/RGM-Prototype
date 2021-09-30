@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+//BarChart to display Fitness
 public class BarChart : MonoBehaviour
 {
 

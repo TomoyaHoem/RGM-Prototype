@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//singleton class to access settings
 public class SettingsReader : MonoBehaviour
 {
     private static SettingsReader instance;

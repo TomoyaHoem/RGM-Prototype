@@ -9,7 +9,7 @@ public class MachineSpawner : MonoBehaviour
     //also responsible for arranging feasible and infeasible population as well as children
 
     //N units as base distance between machines
-    private float maxArea = 50;
+    private float maxArea = 10;
     private int machineGridSize;
 
     public void GenerateMachineGrid()

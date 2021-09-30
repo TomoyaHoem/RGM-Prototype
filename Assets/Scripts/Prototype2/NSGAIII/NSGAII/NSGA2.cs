@@ -5,7 +5,7 @@ using System.Linq;
 
 public static class NSGA2
 {
-    static int NUM_OBJECTIVES = 3;//SettingsReader.Instance.EASettings.FitFunc.Count;
+    static int NUM_OBJECTIVES = SettingsReader.Instance.EASettings.FitFunc.Count-1;
 
     public static List<GameObject> NSGAII(List<List<GameObject>> fronts, int populationSize)
     {
@@ -41,6 +41,12 @@ public static class NSGA2
 
     public static void CalcCrowdingDistance(List<GameObject> front)
     {
+        //reset crowdingdistance
+        foreach (GameObject machine in front)
+        {
+            machine.GetComponent<Machine>().CrowdingDistance = 0;
+        }
+
         for (int i = 0; i < NUM_OBJECTIVES; i++)
         {
             //sort front accroding to objective value in ascending order of magnitude

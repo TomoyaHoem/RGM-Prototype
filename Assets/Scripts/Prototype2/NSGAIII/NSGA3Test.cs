@@ -11,6 +11,7 @@ public class NSGA3Test : MonoBehaviour
     void Start()
     {
         List<ReferencePoint> refPoints = ReferencePointCalculator.CalculateReferencePoints(numPoints, numObjectives);
+        Debug.Log(refPoints.Count);
 
         List<GameObject> testPopulation = new List<GameObject>();
 

@@ -18,12 +18,15 @@ public class Machine : MonoBehaviour
 
     //NSGA2
     public float CrowdingDistance { get; set; }
+    public int NonDominationRank { get; set; }
     //NSGA3
     public List<float> TranslatedObjectives { get; set; }
 
     public bool IsSelected { get; set; }
 
     public float TriangleEdgeLength { get; set; }
+
+    public GameObject End { get; set; }
 
     //Event triggers when Machine is selected
     public event Action<GameObject> MachineSelectedEvent;
@@ -46,6 +49,8 @@ public class Machine : MonoBehaviour
     //switch IsSelected state
     public void SwitchSelect()
     {
+        AddSelectionSprite(SettingsReader.Instance.MachineSettings.MachineArea);
+
         if (IsSelected)
         {
             IsSelected = false;

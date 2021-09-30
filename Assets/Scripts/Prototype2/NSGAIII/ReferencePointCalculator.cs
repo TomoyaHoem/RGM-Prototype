@@ -5,6 +5,7 @@ using UnityEngine;
 public static class ReferencePointCalculator
 {
     //returns approx numPoints uniformly distributed points with numObjectives on the unit hyperplane
+    //RETURNS A LOT MORE THAN NUMPOINTS WHEN OBJECTIVES HIGHER
     public static List<ReferencePoint> CalculateReferencePoints(int numPoints, int numObjectives)
     {
         List<ReferencePoint> referencePoints = new List<ReferencePoint>();

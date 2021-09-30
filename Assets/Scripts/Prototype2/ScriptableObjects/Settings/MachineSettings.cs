@@ -28,15 +28,24 @@ public class MachineSettings : ScriptableObject
     public float GenerationTime { get; set; }
     public int StuckCount { get; set; }
 
+    public int CoverageCount { get; set; }
+    public float Coverage { get; set; }
+
     //EA tests
     public float TotalTestingTime { get; set; }
     public float AverageCompleteTime { get; set; }
     public int CompleteCount { get; set; }
 
-    public int SpeedUp { get; set; }
     public List<float> Fps { get; set; }
-    public float Limit { get; set; }
 
-    public int ParallelMachines { get; set; }
+    [SerializeField] private float limit = 1.2f;
+    public float Limit { get { return limit; } }
+
+    [SerializeField] private int speedUp = 30;
+    public int SpeedUp { get { return speedUp; } }
+    [SerializeField] private int parallelMachines = 8;
+    public int ParallelMachines { get { return parallelMachines; } }
     public float MaxTime { get; set; }
+
+    public List<List<float>> EAStatistics { get; set; }
 }

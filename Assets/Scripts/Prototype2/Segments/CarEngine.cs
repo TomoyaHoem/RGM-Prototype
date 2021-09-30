@@ -19,7 +19,7 @@ public class CarEngine : MonoBehaviour
     public void SwitchEngineState(Collider2D collision)
     {
         //switch on
-        if(!active && collision.gameObject.name.Contains("Ball") || collision.gameObject.name.Contains("Car"))
+        if (!active && collision.gameObject.name.Contains("Ball") || collision.gameObject.name.Contains("Car"))
         {
             gameObject.GetComponent<SpriteRenderer>().color = Color.green;
             Tire1.useMotor = true;
@@ -33,5 +33,13 @@ public class CarEngine : MonoBehaviour
             Tire2.useMotor = false;
             active = false;
         }
+    }
+
+    public void ResetEngine()
+    {
+        gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+        Tire1.useMotor = false;
+        Tire2.useMotor = false;
+        active = false;
     }
 }

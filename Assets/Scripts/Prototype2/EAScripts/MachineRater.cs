@@ -19,16 +19,16 @@ public class MachineRater : MonoBehaviour
             yield break;
         }
 
+        
         if (fitFuncs.ContainsKey("feas"))
         {
             Task testMachines = new Task(gameObject.GetComponent<MachineTestManager>().TestMachinePopulation(population));
             while (testMachines.Running) yield return null;
         }
-
+        
 
         foreach (GameObject machine in population)
         {
-            machine.GetComponent<Machine>().SegmentPieces.Clear();
             //only calculate fitness for new Machines
             if (machine.GetComponent<Machine>().Fitness == 0)
             {
@@ -64,7 +64,7 @@ public class MachineRater : MonoBehaviour
         float result = 0f;
         float num = machine.Segments.Count;
 
-        float bCount = 0, dCount = 0, mCount = 0;
+        float bCount = 0, dCount = 0, mCount = 0, hCount = 0, cCount = 0;
 
         //count segments
         foreach (GameObject seg in machine.Segments)
@@ -72,17 +72,19 @@ public class MachineRater : MonoBehaviour
             if (seg.GetComponent<SegmentPart>().SegmentID == 0) dCount++;
             if (seg.GetComponent<SegmentPart>().SegmentID == 1) bCount++;
             if (seg.GetComponent<SegmentPart>().SegmentID == 2 || seg.GetComponent<SegmentPart>().SegmentID == 3) mCount++;
+            if (seg.GetComponent<SegmentPart>().SegmentID == 4) hCount++;
+            if (seg.GetComponent<SegmentPart>().SegmentID == 5) cCount++;
         }
 
         //simpson index D = 1 - [Sum n*(n-1)]/[Count*(Count-1)] does not account 0 values
         //-> Shannon Equitability Index
 
         //calculate proportions
-        dCount /= num; bCount /= num; mCount /= num;
+        dCount /= num; bCount /= num; mCount /= num; hCount /= num; cCount /= num;
 
-        float shanDiv = dCount * RGMTest.LN(dCount) + bCount * RGMTest.LN(bCount) + mCount * RGMTest.LN(mCount);
+        float shanDiv = dCount * RGMTest.LN(dCount) + bCount * RGMTest.LN(bCount) + mCount * RGMTest.LN(mCount) + hCount * RGMTest.LN(hCount) + cCount * RGMTest.LN(cCount);
 
-        result = Mathf.Abs(shanDiv / Mathf.Log(3));
+        result = Mathf.Abs(shanDiv / Mathf.Log(5));
 
         return result;
     }
@@ -173,9 +175,15 @@ public class MachineRater : MonoBehaviour
 
         //calculate restriction area size
         restrictionCoverage = CalculateRestrictionCoverage(SettingsReader.Instance.MachineSettings.MachineArea, machine);
-
+        
         //compare results
         result = machineCoverage / restrictionCoverage;
+
+        if(machine.Segments.Count == SettingsReader.Instance.MachineSettings.NumSegments)
+        {
+            SettingsReader.Instance.MachineSettings.CoverageCount++;
+            SettingsReader.Instance.MachineSettings.Coverage += machineCoverage;
+        }
 
         return result;
     }

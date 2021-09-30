@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class RGMTest : MonoBehaviour
 {
-    //starts process
+    //ENTRY CLASS
 
     // Start is called before the first frame update
     void Start()
@@ -22,6 +22,7 @@ public class RGMTest : MonoBehaviour
         return x < 0 ? -1 : (x > 0 ? 1 : 0);
     }
 
+    //custom LN function to return 0 when x is 0
     public static float LN(float x)
     {
         if(x == 0)
@@ -33,6 +34,7 @@ public class RGMTest : MonoBehaviour
         }
     }
 
+    //draws rectangle specified by opposite rectangle corners
     public static void DrawRectangle(Vector2 topCorner, Vector2 bottomCorner, Color color, float duration)
     {
         Vector2 topOppositeCorner = new Vector2(bottomCorner.x, topCorner.y);

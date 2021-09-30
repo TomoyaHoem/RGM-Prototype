@@ -10,14 +10,14 @@ public static class Niching
         //for every individual find closest reference point
         for (int t = 0; t < fronts.Count; t++)
         {
-            foreach(GameObject machine in fronts[t])
+            foreach (GameObject machine in fronts[t])
             {
                 int minRefPointIndex = -1;
                 float minDistance = float.MaxValue;
                 for (int r = 0; r < refPoints.Count; r++)
                 {
                     float d = PerpendicularDistance(refPoints[r].Position, machine.GetComponent<Machine>().TranslatedObjectives);
-                    if(d < minDistance)
+                    if (d < minDistance)
                     {
                         minDistance = d;
                         minRefPointIndex = r;
@@ -25,10 +25,11 @@ public static class Niching
                 }
                 //if current individual is not in last front we only need to store that it is associated with the current reference point 
                 //-> increase count of associated members, stored in reference point
-                if(t+1 != fronts.Count)
+                if (t + 1 != fronts.Count)
                 {
                     refPoints[minRefPointIndex].AddMember();
-                } else //if individual in last front -> store indivudal and distance as tuple property in reference point
+                }
+                else //if individual in last front -> store indivudal and distance as tuple property in reference point
                 {
                     refPoints[minRefPointIndex].AddLastFrontMember(machine, minDistance);
                 }
@@ -56,14 +57,14 @@ public static class Niching
         for (int i = 0; i < direction.Count; i++)
         {
             numerator += direction[i] * point[i];
-            denominator += Mathf.Pow(direction[i],2);
+            denominator += Mathf.Pow(direction[i], 2.0f);
         }
         float k = numerator / denominator;
 
         float d = 0;
         for (int i = 0; i < direction.Count; i++)
         {
-            d += Mathf.Pow(k*direction[i]-point[i],2);
+            d += Mathf.Pow((k * direction[i]) - point[i], 2.0f);
         }
         return Mathf.Sqrt(d);
     }
@@ -79,9 +80,9 @@ public static class Niching
             minMemberSize = Mathf.Min(minMemberSize, refPoints[r].MemberCount);
         }
         //find all referencepoints with that min membercount
-        foreach(ReferencePoint r in refPoints)
+        foreach (ReferencePoint r in refPoints)
         {
-            if(r.MemberCount == minMemberSize)
+            if (r.MemberCount == minMemberSize)
             {
                 minPoints.Add(r);
             }
@@ -90,14 +91,15 @@ public static class Niching
         ReferencePoint current = minPoints[UnityEngine.Random.Range(0, minPoints.Count)];
 
         //check if there are any potential memebers from the last front
-        if(current.LastFrontMembers.Count > 0)
+        if (current.LastFrontMembers.Count > 0)
         {
             //if there are some check if min membercount = 0
-            if(minMemberSize == 0)
+            if (minMemberSize == 0)
             {
                 //choose individual with lowest distance to reference point from last front
                 nextPopulation.Add(MinTuple(current.LastFrontMembers).Item1);
-            } else
+            }
+            else
             {
                 //choose random individual since an individual from a better front is already associated with current reference point
                 nextPopulation.Add(current.LastFrontMembers[UnityEngine.Random.Range(0, current.LastFrontMembers.Count)].Item1);

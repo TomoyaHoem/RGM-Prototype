@@ -42,6 +42,9 @@ public class Car : SegmentPart
                 CarPiece.transform.GetChild(i).rotation = CarPartSpawnRotation[i];
             }
 
+            //rest engine
+            CarPiece.transform.GetChild(0).transform.GetChild(0).GetComponent<CarEngine>().ResetEngine();
+
             //reset testing
             CarPiece.transform.GetChild(0).GetComponent<SegmentPiece>().ResetTest();
         }

@@ -6,7 +6,7 @@ using System.Linq;
 public class MachineSelector : MonoBehaviour
 {
     //returns list of parent pairs in descending order
-    public IEnumerator SelectMachines(List<GameObject> population, List<GameObject> bestParents, bool feasible)
+    public IEnumerator SelectMachines(List<GameObject> population, List<GameObject> bestParents, bool feasible, bool crowding)
     {
         if(population.Count < 2)
         {
@@ -15,7 +15,7 @@ public class MachineSelector : MonoBehaviour
         }
         
         //thee forths of populationsize will be chosen as parents
-        int numParents = Mathf.RoundToInt(0.75f * population.Count);
+        int numParents = Mathf.RoundToInt(SettingsReader.Instance.EASettings.ParentSize * population.Count);
         if(numParents % 2 != 0)
         {
             numParents++;
@@ -24,7 +24,13 @@ public class MachineSelector : MonoBehaviour
         if (feasible)
         {
             //random selection, pass copy of population as it will be changed
-            RandomSelection(new List<GameObject>(population), bestParents, numParents);
+            if(SettingsReader.Instance.EASettings.NSGA == 2)
+            {
+                TournamentSelectionNSGA2(new List<GameObject>(population), bestParents, numParents, 2, crowding);
+            } else
+            {
+                RandomSelection(new List<GameObject>(population), bestParents, numParents);
+            }
         } else
         {
             //Tournament selection
@@ -76,6 +82,50 @@ public class MachineSelector : MonoBehaviour
                 if(winner.GetComponent<Machine>().FitnessVals[feasIndex] < tournament[j].GetComponent<Machine>().FitnessVals[feasIndex])
                 {
                     winner = tournament[j];
+                }
+            }
+
+            //add winner to best parents and remove from copied population
+            bestParents.Add(winner);
+            population.Remove(winner);
+        }
+    }
+
+    //tournament selection without replacement and crowding comparison
+    private void TournamentSelectionNSGA2(List<GameObject> population, List<GameObject> bestParents, int numParents, int TournamentSize, bool crowding)
+    {
+        int randomPick = 0;
+
+        GameObject winner = null;
+
+        List<GameObject> tournament;
+
+        for (int i = 0; i < numParents; i++)
+        {
+            //new tournament for each parent to choose
+            tournament = new List<GameObject>();
+            //choose random individuals from population for tournament with set tournamentsize
+            for (int j = 0; j < TournamentSize; j++)
+            {
+                randomPick = Random.Range(0, population.Count);
+                tournament.Add(population[randomPick]);
+            }
+            //find best in tournament based on feasibility
+            winner = tournament[0];
+            for (int j = 1; j < TournamentSize; j++)
+            {
+                if (winner.GetComponent<Machine>().NonDominationRank > tournament[j].GetComponent<Machine>().NonDominationRank)
+                {
+                    winner = tournament[j];
+                } else if(winner.GetComponent<Machine>().NonDominationRank == tournament[j].GetComponent<Machine>().NonDominationRank)
+                {
+                    if (crowding)
+                    {
+                        if(winner.GetComponent<Machine>().CrowdingDistance < tournament[j].GetComponent<Machine>().CrowdingDistance)
+                        {
+                            winner = tournament[j];
+                        }
+                    }
                 }
             }
 
